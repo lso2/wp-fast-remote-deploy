@@ -1,9 +1,14 @@
 #!/bin/bash
 
+# WordPress Plugin Fast Deployment Script
+# Created by: lso2 (https://github.com/lso2)
+# Repository: https://github.com/lso2/wp-fast-remote-deploy
+# License: MIT
+
 # Fast Deployment - Optimized for Speed
 PLUGIN_NAME="your-plugin-name"
-LOCAL_PLUGIN_DIR="/mnt/c/path/to/your/folder/$PLUGIN_NAME"
-BACKUP_DIR="/mnt/c/path/to/your/backups"
+LOCAL_PLUGIN_DIR="/mnt/c/path/to/your/plugin/$PLUGIN_NAME"
+BACKUP_DIR="/mnt/c/path/to/your/plugin/_plugin_backups"
 AUTO_CLOSE=false
 
 # SSH Configuration

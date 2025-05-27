@@ -1,6 +1,11 @@
 @echo off
+REM WordPress Plugin Fast Deployment Script
+REM Created by: lso2 (https://github.com/lso2)
+REM Repository: https://github.com/lso2/wp-fast-remote-deploy
+REM License: MIT
+
 cd /d "%~dp0"
-echo Starting deployment from %CD%...
+echo Starting plugin deployment from %CD%...
 echo.
 
 REM Get the current directory path

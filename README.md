@@ -1,6 +1,9 @@
-# Fast WordPress Plugin Deployment Script
+# Ultra Fast WordPress Plugin Deployment Script
 
-A high-speed deployment script for WordPress plugin development that eliminates manual file copying and provides one-click deployment with automatic backups.
+> **Created by:** [lso2](https://github.com/lso2)  
+> **Repository:** [wp-fast-remote-deploy](https://github.com/lso2/wp-fast-remote-deploy)
+
+A time-saving deployment script for WordPress plugin development that eliminates manual file copying and provides one-click deployment with automatic backups.
 
 ## Features
 
@@ -306,9 +309,19 @@ project/
 4. Test thoroughly with your own plugin
 5. Submit a pull request
 
+## Author
+
+**lso2**
+- GitHub: [@lso2](https://github.com/lso2)
+- Repository: [wp-fast-remote-deploy](https://github.com/lso2/wp-fast-remote-deploy)
+
 ## License
 
 MIT License - feel free to use and modify for your projects.
+
+---
+
+**⭐ If this script saved you time, please star the repository!**
 
 ## Changelog
 
