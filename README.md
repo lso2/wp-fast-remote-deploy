@@ -17,9 +17,9 @@ This automates several things to save time:
 ## Usage Summary
 
 - Two files are used: a .bat in the root, and a .sh file in the .run folder.
-- Download the repo and drop it directly into your root, so that the .bat file is in the same folder as your plugin folder.
+- Download the repo and drop it directly into your root, so that the .bat file is in the same folder as your plugin folders.
 - Configure the config.sh file by adding your real paths and server details.
-- In the same file include the folder name of your plugin like your-plugin-folder-name
+- **Super simple plugin switching:** Just change `PLUGIN_FOLDER="my-plugin"` to `PLUGIN_FOLDER="my-other-plugin"`
 - Run the file by double-clicking the .bat file. It will open a CMD window which will show you the progress and details.
 
 ## Screenshot
@@ -205,21 +205,46 @@ ssh-add ~/.ssh/id_rsa
 Edit the `config.sh` file in the root directory with your settings:
 
 ```bash
-# Plugin Configuration
-PLUGIN_NAME="your-plugin-name"
-LOCAL_PLUGIN_DIR="/mnt/c/path/to/your/plugin/$PLUGIN_NAME"
-BACKUP_DIR="/mnt/c/path/to/your/plugin/_plugin_backups"
-AUTO_CLOSE=false
+# PLUGIN CONFIGURATION - Just change the plugin folder name here!
+PLUGIN_FOLDER="your-plugin-folder"  # Change this to switch plugins instantly
 
-# SSH Configuration  
+# Local Environment
+LOCAL_BASE="/mnt/c/path/to/your/plugins"
+LOCAL_BACKUP_FOLDER=".plugin_backups"  # Folder name for backups
+
+# Remote Environment  
+REMOTE_BASE="/path/to/wordpress/root"
+REMOTE_PLUGINS_FOLDER="wp-content/plugins"
+REMOTE_BACKUP_FOLDER=".backups"
+
+# SSH Configuration
 SSH_HOST="your-server-ip"
 SSH_PORT="22"
 SSH_USER="username"
 SSH_KEY="~/.ssh/id_rsa"
-REMOTE_PLUGINS_DIR="/path/to/wp-content/plugins"
-REMOTE_BACKUP_DIR="/path/to/wp-content/plugin-backups"
-WP_PATH="/path/to/wordpress/root"
 ```
+
+### Streamlined Path Management
+
+**No path repetition!** Set base paths once:
+- **Local:** `/mnt/c/path/to/your/plugins/`
+- **Remote:** `/path/to/wordpress/root/`
+
+**Automatic path building:**
+- `LOCAL_PLUGIN_DIR` = `LOCAL_BASE` + `PLUGIN_FOLDER`
+- `REMOTE_PLUGINS_DIR` = `REMOTE_BASE` + `wp-content/plugins`
+- `BACKUP_DIR` = `LOCAL_BASE` + `.plugin_backups`
+
+**Easy environment switching:** Change `REMOTE_BASE` to switch between staging/production servers!
+
+### Super Simple Plugin Switching
+
+To switch between plugins:
+1. Open `config.sh`
+2. Change `PLUGIN_FOLDER="my-plugin"` to `PLUGIN_FOLDER="my-other-plugin"`
+3. Save and run `deploy.bat`
+
+**No complex definitions needed!** Just use your actual plugin folder names.
 
 ## Usage
 

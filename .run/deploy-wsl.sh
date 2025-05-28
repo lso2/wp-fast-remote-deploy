@@ -36,9 +36,10 @@ NC='\033[0m' 					# No Color
 
 echo ""
 echo -e "${PINK}⚡  Deploy:${NC} ${GOLD}$PLUGIN_NAME${NC} ${GREY}v$VERSION${NC}"
+echo -e "${GREY}Folder: $PLUGIN_FOLDER${NC}"
 
 # Extract version quickly (single grep)
-PLUGIN_VERSION=$(grep -m1 "Version:" "$LOCAL_PLUGIN_DIR/$PLUGIN_NAME.php" | sed 's/.*Version:[[:space:]]*\([0-9.]*\).*/\1/' | tr -d "\"' ")
+PLUGIN_VERSION=$(grep -m1 "Version:" "$LOCAL_PLUGIN_DIR/$PLUGIN_FOLDER.php" | sed 's/.*Version:[[:space:]]*\([0-9.]*\).*/\1/' | tr -d "\"' ")
 
 if [[ -z "$PLUGIN_VERSION" ]]; then
     echo -e "${RED}❌ No plugin version found${NC}"
@@ -83,22 +84,22 @@ WP_CLI_CHECK=$(ssh $SSH_OPTS "$SSH_USER@$SSH_HOST" "
     if which wp >/dev/null 2>&1; then
         echo 'wp_available'
         # Deactivate plugin
-        cd '$WP_PATH' && wp plugin deactivate '$PLUGIN_NAME' --allow-root >/dev/null 2>&1 || true
+        cd '$WP_PATH' && wp plugin deactivate '$PLUGIN_FOLDER' --allow-root >/dev/null 2>&1 || true
     else
         echo 'wp_not_found'
     fi
     
     # Handle existing remote folder
-    if [ -d '$REMOTE_PLUGINS_DIR/$PLUGIN_NAME' ]; then
+    if [ -d '$REMOTE_PLUGINS_DIR/$PLUGIN_FOLDER' ]; then
         # Create remote tar.gz backup first
         cd '$REMOTE_PLUGINS_DIR'
-        tar -czf '$REMOTE_BACKUP_DIR/$PLUGIN_NAME.$PLUGIN_VERSION-$TIMESTAMP.tar.gz' '$PLUGIN_NAME'
+        tar -czf '$REMOTE_BACKUP_DIR/$PLUGIN_FOLDER.$PLUGIN_VERSION-$TIMESTAMP.tar.gz' '$PLUGIN_FOLDER'
         
         # Rename existing folder 
-        if [ -d '$REMOTE_PLUGINS_DIR/$PLUGIN_NAME.$PLUGIN_VERSION' ]; then
-            mv '$PLUGIN_NAME' '$PLUGIN_NAME.$PLUGIN_VERSION-$TIMESTAMP'
+        if [ -d '$REMOTE_PLUGINS_DIR/$PLUGIN_FOLDER.$PLUGIN_VERSION' ]; then
+            mv '$PLUGIN_FOLDER' '$PLUGIN_FOLDER.$PLUGIN_VERSION-$TIMESTAMP'
         else
-            mv '$PLUGIN_NAME' '$PLUGIN_NAME.$PLUGIN_VERSION'
+            mv '$PLUGIN_FOLDER' '$PLUGIN_FOLDER.$PLUGIN_VERSION'
         fi
         echo 'backed_up_and_renamed'
     else
@@ -128,7 +129,7 @@ fi
 echo ""
 if [[ "$USE_WP_CLI" == true ]]; then
     echo -e "${PINK}🔌 Reactivating plugin...${NC}"
-    ssh -i "$SSH_KEY" -p "$SSH_PORT" "$SSH_USER@$SSH_HOST" "export LC_ALL=C LANG=C LANGUAGE=C TERM=xterm; cd '$WP_PATH' && wp plugin activate '$PLUGIN_NAME' --allow-root" >/dev/null 2>&1
+    ssh -i "$SSH_KEY" -p "$SSH_PORT" "$SSH_USER@$SSH_HOST" "export LC_ALL=C LANG=C LANGUAGE=C TERM=xterm; cd '$WP_PATH' && wp plugin activate '$PLUGIN_FOLDER' --allow-root" >/dev/null 2>&1
 fi
 if [[ "$USE_WP_CLI" == true ]]; then
     echo -e "${GREEN}🔌 Plugin reactivated automatically${NC}"
@@ -145,7 +146,7 @@ rm -f "$TEMP_TAR"
 # Verify the deployment
 echo ""
 echo -e "${PURPLE}🔌 Verifying deployment...${NC}"
-VERIFY_FILE=$(ssh -i "$SSH_KEY" -p "$SSH_PORT" "$SSH_USER@$SSH_HOST" "test -f '$REMOTE_PLUGINS_DIR/$PLUGIN_NAME/$PLUGIN_NAME.php' && echo 'found' || echo 'not_found'" 2>/dev/null)
+VERIFY_FILE=$(ssh -i "$SSH_KEY" -p "$SSH_PORT" "$SSH_USER@$SSH_HOST" "test -f '$REMOTE_PLUGINS_DIR/$PLUGIN_FOLDER/$PLUGIN_FOLDER.php' && echo 'found' || echo 'not_found'" 2>/dev/null)
 
 if [[ "$VERIFY_FILE" != "found" ]]; then
     echo -e "${RED}ERROR: Deployment verification failed${NC}"
@@ -153,7 +154,7 @@ if [[ "$VERIFY_FILE" != "found" ]]; then
 fi
 
 # Final verification
-VERIFY=$(ssh -i "$SSH_KEY" -p "$SSH_PORT" "$SSH_USER@$SSH_HOST" "find '$REMOTE_PLUGINS_DIR/$PLUGIN_NAME' -type f | wc -l" 2>/dev/null)
+VERIFY=$(ssh -i "$SSH_KEY" -p "$SSH_PORT" "$SSH_USER@$SSH_HOST" "find '$REMOTE_PLUGINS_DIR/$PLUGIN_FOLDER' -type f | wc -l" 2>/dev/null)
 LOCAL_COUNT=$(find "$LOCAL_PLUGIN_DIR" -type f | wc -l)
 
 echo ""
@@ -170,8 +171,8 @@ echo -e "${GREY}   📦 tar.gz: $BACKUP_DIR/$TARGZ_NAME${NC}"
 if [[ "$WP_CLI_CHECK" == *"backed_up_and_renamed"* ]]; then
     echo ""
     echo -e "${GOLD}💾 Remote Backups:${NC}"
-    echo -e "${GREY}   📦 tar.gz: $REMOTE_BACKUP_DIR/$PLUGIN_NAME.$PLUGIN_VERSION-$TIMESTAMP.tar.gz${NC}"
-    echo -e "${GREY}   📁 folder: $REMOTE_PLUGINS_DIR/$PLUGIN_NAME.$PLUGIN_VERSION*${NC}"
+    echo -e "${GREY}   📦 tar.gz: $REMOTE_BACKUP_DIR/$PLUGIN_FOLDER.$PLUGIN_VERSION-$TIMESTAMP.tar.gz${NC}"
+    echo -e "${GREY}   📁 folder: $REMOTE_PLUGINS_DIR/$PLUGIN_FOLDER.$PLUGIN_VERSION*${NC}"
 fi
 
 echo ""

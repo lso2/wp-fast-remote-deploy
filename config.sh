@@ -7,19 +7,44 @@
 
 # Script Configuration
 SCRIPT_NAME="deploy-wsl.sh"  # Name of the deployment script
-VERSION="1.0.1"              # Script version
+VERSION="1.0.3"              # Script version
 
-# Plugin Configuration
-PLUGIN_NAME="your-plugin-name"
-LOCAL_PLUGIN_DIR="/mnt/c/path/to/your/plugin/$PLUGIN_NAME"
-BACKUP_DIR="/mnt/c/path/to/your/plugin/_plugin_backups"
-AUTO_CLOSE=false
+# ============================================================================
+# PLUGIN CONFIGURATION - Just change the plugin folder name here!
+# ============================================================================
+
+PLUGIN_FOLDER="your-plugin-folder"  # Change this to switch plugins instantly
+
+# ============================================================================
+# BASE PATHS - Set once, used for all plugins
+# ============================================================================
+
+# Local Environment
+LOCAL_BASE="/mnt/c/path/to/your/plugins"
+LOCAL_BACKUP_FOLDER=".plugin_backups"  # Folder name for backups
+
+# Remote Environment  
+REMOTE_BASE="/path/to/wordpress/root"
+REMOTE_PLUGINS_FOLDER="wp-content/plugins"
+REMOTE_BACKUP_FOLDER=".backups"
 
 # SSH Configuration
 SSH_HOST="your-server-ip"
 SSH_PORT="22"
 SSH_USER="username"
 SSH_KEY="~/.ssh/id_rsa"
-REMOTE_PLUGINS_DIR="/path/to/wp-content/plugins"
-REMOTE_BACKUP_DIR="/path/to/wp-content/plugin-backups"  # Remote backup directory
-WP_PATH="/path/to/wordpress/root"
+
+# Other Settings
+AUTO_CLOSE=false
+
+# ============================================================================
+# AUTO-GENERATED VALUES - Don't edit below this line
+# ============================================================================
+
+# Build full paths from base paths
+PLUGIN_NAME="$PLUGIN_FOLDER"  # Use folder name as plugin name
+LOCAL_PLUGIN_DIR="$LOCAL_BASE/$PLUGIN_FOLDER"
+BACKUP_DIR="$LOCAL_BASE/$LOCAL_BACKUP_FOLDER"
+REMOTE_PLUGINS_DIR="$REMOTE_BASE/$REMOTE_PLUGINS_FOLDER"
+REMOTE_BACKUP_DIR="$REMOTE_BASE/$REMOTE_BACKUP_FOLDER"
+WP_PATH="$REMOTE_BASE"
