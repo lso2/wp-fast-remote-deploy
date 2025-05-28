@@ -21,12 +21,9 @@ PLUGIN_FOLDER="your-plugin-folder"  # Change this to switch plugins instantly
 
 # Local Environment
 LOCAL_BASE="/mnt/c/path/to/your/plugins"
-LOCAL_BACKUP_FOLDER=".plugin_backups"  # Folder name for backups
 
 # Remote Environment  
 REMOTE_BASE="/path/to/wordpress/root"
-REMOTE_PLUGINS_FOLDER="wp-content/plugins"
-REMOTE_BACKUP_FOLDER=".backups"
 
 # SSH Configuration
 SSH_HOST="your-server-ip"
@@ -34,8 +31,18 @@ SSH_PORT="22"
 SSH_USER="username"
 SSH_KEY="~/.ssh/id_rsa"
 
-# Other Settings
+
+# ============================================================================
+# Other Settings (Optional)
+# ============================================================================
+
+# Whether to close the cmd window automatically on completion
 AUTO_CLOSE=false
+
+# Other Paths (for customization)
+LOCAL_BACKUP_FOLDER=".plugin_backups"  # Folder name for backups
+REMOTE_PLUGINS_FOLDER="wp-content/plugins"
+REMOTE_BACKUP_FOLDER=".backups"
 
 # ============================================================================
 # AUTO-GENERATED VALUES - Don't edit below this line
