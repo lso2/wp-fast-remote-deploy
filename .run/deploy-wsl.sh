@@ -4,20 +4,19 @@
 # Created by: lso2 (https://github.com/lso2)
 # Repository: https://github.com/lso2/wp-fast-remote-deploy
 # License: MIT
+# Version: 1.0.1
 
-# Fast Deployment - Optimized for Speed
-PLUGIN_NAME="your-plugin-name"
-LOCAL_PLUGIN_DIR="/mnt/c/path/to/your/plugin/$PLUGIN_NAME"
-BACKUP_DIR="/mnt/c/path/to/your/plugin/_plugin_backups"
-AUTO_CLOSE=false
+# Load configuration
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+CONFIG_FILE="$SCRIPT_DIR/../config.sh"
 
-# SSH Configuration
-SSH_HOST="your-server-ip"
-SSH_PORT="22"
-SSH_USER="username"
-SSH_KEY="~/.ssh/id_rsa"
-REMOTE_PLUGINS_DIR="/path/to/wp-content/plugins"
-WP_PATH="/path/to/wordpress/root"
+if [[ ! -f "$CONFIG_FILE" ]]; then
+    echo "❌ Configuration file not found: $CONFIG_FILE"
+    echo "Please create config.sh in the root directory."
+    exit 1
+fi
+
+source "$CONFIG_FILE"
 
 # SSH connection reuse for speed
 SSH_OPTS="-i $SSH_KEY -p $SSH_PORT -o ControlMaster=auto -o ControlPath=/tmp/ssh-%r@%h:%p -o ControlPersist=10s -o ConnectTimeout=5 -o BatchMode=yes"
@@ -36,32 +35,30 @@ WHITE='\033[38;2;255;255;255m'  # Pure white
 NC='\033[0m' 					# No Color
 
 echo ""
-echo -e "${PINK}⚡  Deploy:${NC} ${GOLD}$PLUGIN_NAME${NC}"
+echo -e "${PINK}⚡  Deploy:${NC} ${GOLD}$PLUGIN_NAME${NC} ${GREY}v$VERSION${NC}"
 
 # Extract version quickly (single grep)
-VERSION=$(grep -m1 "Version:" "$LOCAL_PLUGIN_DIR/$PLUGIN_NAME.php" | sed 's/.*Version:[[:space:]]*\([0-9.]*\).*/\1/' | tr -d "\"' ")
+PLUGIN_VERSION=$(grep -m1 "Version:" "$LOCAL_PLUGIN_DIR/$PLUGIN_NAME.php" | sed 's/.*Version:[[:space:]]*\([0-9.]*\).*/\1/' | tr -d "\"' ")
 
-if [[ -z "$VERSION" ]]; then
-    echo -e "${RED}❌ No version found${NC}"
+if [[ -z "$PLUGIN_VERSION" ]]; then
+    echo -e "${RED}❌ No plugin version found${NC}"
     exit 1
 fi
 
-echo -e "${PINK}📦 Version:${NC} ${WHITE}$VERSION${NC}"
+echo -e "${PINK}📦 Plugin Version:${NC} ${WHITE}$PLUGIN_VERSION${NC}"
 echo ""
 
-# Fast parallel backup operations
+# Create backup directories
 mkdir -p "$BACKUP_DIR"
 TIMESTAMP=$(date +%H%M%S)
 
+# Only create tar.gz backup locally (no folder copy)
+echo -e "${PURPLE}💾 Creating local backup...${NC}"
 {
-    # Local folder backup (background)
     cd "$(dirname "$LOCAL_PLUGIN_DIR")"
-    BACKUP_FOLDER_NAME="$PLUGIN_NAME.$VERSION-$TIMESTAMP"
-    cp -r "$LOCAL_PLUGIN_DIR" "$BACKUP_DIR/$BACKUP_FOLDER_NAME" &
-    BACKUP_PID=$!
     
-    # Create tar.gz backup (background)
-    TARGZ_NAME="$PLUGIN_NAME.$VERSION-$TIMESTAMP.tar.gz"
+    # Create tar.gz backup only locally
+    TARGZ_NAME="$PLUGIN_NAME.$PLUGIN_VERSION-$TIMESTAMP.tar.gz"
     tar -czf "$BACKUP_DIR/$TARGZ_NAME" "$(basename "$LOCAL_PLUGIN_DIR")" &
     TARGZ_PID=$!
     
@@ -71,8 +68,6 @@ TIMESTAMP=$(date +%H%M%S)
     UPLOAD_PID=$!
 }
 
-echo -e "${PURPLE}💾 Creating backups...${NC}"
-
 # Check WP-CLI and prepare remote (single SSH call for speed)
 echo -e "${BLUE}🔧 Preparing remote...${NC}"
 
@@ -80,8 +75,9 @@ echo -e "${BLUE}🔧 Preparing remote...${NC}"
 WP_CLI_CHECK=$(ssh $SSH_OPTS "$SSH_USER@$SSH_HOST" "
     export LC_ALL=C LANG=C LANGUAGE=C TERM=xterm
     
-    # Prepare directory first
+    # Prepare directories
     mkdir -p '$REMOTE_PLUGINS_DIR'
+    mkdir -p '$REMOTE_BACKUP_DIR'
     
     # Check WP-CLI
     if which wp >/dev/null 2>&1; then
@@ -92,14 +88,19 @@ WP_CLI_CHECK=$(ssh $SSH_OPTS "$SSH_USER@$SSH_HOST" "
         echo 'wp_not_found'
     fi
     
-    # Rename existing folder if it exists
+    # Handle existing remote folder
     if [ -d '$REMOTE_PLUGINS_DIR/$PLUGIN_NAME' ]; then
-        if [ -d '$REMOTE_PLUGINS_DIR/$PLUGIN_NAME.$VERSION' ]; then
-            mv '$REMOTE_PLUGINS_DIR/$PLUGIN_NAME' '$REMOTE_PLUGINS_DIR/$PLUGIN_NAME.$VERSION-$TIMESTAMP'
+        # Create remote tar.gz backup first
+        cd '$REMOTE_PLUGINS_DIR'
+        tar -czf '$REMOTE_BACKUP_DIR/$PLUGIN_NAME.$PLUGIN_VERSION-$TIMESTAMP.tar.gz' '$PLUGIN_NAME'
+        
+        # Rename existing folder 
+        if [ -d '$REMOTE_PLUGINS_DIR/$PLUGIN_NAME.$PLUGIN_VERSION' ]; then
+            mv '$PLUGIN_NAME' '$PLUGIN_NAME.$PLUGIN_VERSION-$TIMESTAMP'
         else
-            mv '$REMOTE_PLUGINS_DIR/$PLUGIN_NAME' '$REMOTE_PLUGINS_DIR/$PLUGIN_NAME.$VERSION'
+            mv '$PLUGIN_NAME' '$PLUGIN_NAME.$PLUGIN_VERSION'
         fi
-        echo 'renamed'
+        echo 'backed_up_and_renamed'
     else
         echo 'no_existing'
     fi
@@ -135,8 +136,8 @@ else
     echo -e "${YELLOW}🔌 Plugin: ${WHITE}Manual activation required${NC}"
 fi
 
-# Wait for local backups to complete
-wait $BACKUP_PID $TARGZ_PID
+# Wait for local backup to complete
+wait $TARGZ_PID
 
 # Cleanup
 rm -f "$TEMP_TAR"
@@ -153,7 +154,6 @@ fi
 
 # Final verification
 VERIFY=$(ssh -i "$SSH_KEY" -p "$SSH_PORT" "$SSH_USER@$SSH_HOST" "find '$REMOTE_PLUGINS_DIR/$PLUGIN_NAME' -type f | wc -l" 2>/dev/null)
-
 LOCAL_COUNT=$(find "$LOCAL_PLUGIN_DIR" -type f | wc -l)
 
 echo ""
@@ -161,14 +161,20 @@ echo -e "${GREEN}---------------------------------------------------${NC}"
 echo -e "${GREEN}🚀 Deployment successful!${NC}"
 echo -e "${GREEN}---------------------------------------------------${NC}"
 echo ""
-echo -e "${CYAN}📦 Version:${NC} ${WHITE}$VERSION${NC}"
+echo -e "${CYAN}📦 Plugin Version:${NC} ${WHITE}$PLUGIN_VERSION${NC}"
 echo -e "${PURPLE}📁 Files:${NC} ${WHITE}$VERIFY/$LOCAL_COUNT${NC}"
 echo ""
-echo -e "${GOLD}💾 Backups:${NC}"
-echo -e "${GREY}   📁 folder: $BACKUP_DIR/$BACKUP_FOLDER_NAME${NC}"
+echo -e "${GOLD}💾 Local Backup:${NC}"
 echo -e "${GREY}   📦 tar.gz: $BACKUP_DIR/$TARGZ_NAME${NC}"
-echo ""
 
+if [[ "$WP_CLI_CHECK" == *"backed_up_and_renamed"* ]]; then
+    echo ""
+    echo -e "${GOLD}💾 Remote Backups:${NC}"
+    echo -e "${GREY}   📦 tar.gz: $REMOTE_BACKUP_DIR/$PLUGIN_NAME.$PLUGIN_VERSION-$TIMESTAMP.tar.gz${NC}"
+    echo -e "${GREY}   📁 folder: $REMOTE_PLUGINS_DIR/$PLUGIN_NAME.$PLUGIN_VERSION*${NC}"
+fi
+
+echo ""
 echo -e "${GREY}---------------------------------------------------${NC}"
 if [[ "$AUTO_CLOSE" != true ]]; then
     echo "Press any key to continue..."

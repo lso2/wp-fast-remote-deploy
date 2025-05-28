@@ -5,6 +5,27 @@
 
 A time-saving deployment script for WordPress plugin development that eliminates manual file copying and provides one-click deployment with automatic backups.
 
+## Summary
+
+This automates several things to save time:
+- Backs up the local folder to a .tar.gz
+- Backs up the remote folder by renaming it by appending the version number  
+- Copies the folder locally to the WP plugin directory quickly using a temporary .tar.gz and unpacking remotely
+- Deactivates and reactivates the plugin using WP-CLI, to help re-initialize it
+- Gives a summary of what was done
+
+## Usage Summary
+
+- Two files are used: a .bat in the root, and a .sh file in the .run folder.
+- Download the repo and drop it directly into your root, so that the .bat file is in the same folder as your plugin folder.
+- Configure the config.sh file by adding your real paths and server details.
+- In the same file include the folder name of your plugin like your-plugin-folder-name
+- Run the file by double-clicking the .bat file. It will open a CMD window which will show you the progress and details.
+
+## Screenshot
+
+![Screenshot of CMD window on completion](images/screenshot.jpg)
+
 ## Features
 
 - ⚡ **Fast Deployment** - SSH multiplexing and parallel operations
@@ -181,14 +202,14 @@ ssh-add ~/.ssh/id_rsa
 
 ## Configuration
 
-Edit the top of `deploy-wsl.sh` with your settings:
+Edit the `config.sh` file in the root directory with your settings:
 
 ```bash
 # Plugin Configuration
 PLUGIN_NAME="your-plugin-name"
-LOCAL_PLUGIN_DIR="/mnt/c/path/to/your/plugin"
-BACKUP_DIR="/mnt/c/path/to/backups"
-AUTO_CLOSE=false  # Set to true to auto-close after completion
+LOCAL_PLUGIN_DIR="/mnt/c/path/to/your/plugin/$PLUGIN_NAME"
+BACKUP_DIR="/mnt/c/path/to/your/plugin/_plugin_backups"
+AUTO_CLOSE=false
 
 # SSH Configuration  
 SSH_HOST="your-server-ip"
@@ -196,6 +217,7 @@ SSH_PORT="22"
 SSH_USER="username"
 SSH_KEY="~/.ssh/id_rsa"
 REMOTE_PLUGINS_DIR="/path/to/wp-content/plugins"
+REMOTE_BACKUP_DIR="/path/to/wp-content/plugin-backups"
 WP_PATH="/path/to/wordpress/root"
 ```
 
@@ -296,6 +318,7 @@ Speed improvements come from:
 ```
 project/
 ├── deploy.bat              # Windows batch script
+├── config.sh               # Configuration file
 ├── .run/
 │   └── deploy-wsl.sh      # Main deployment script
 └── README.md              # This file
@@ -324,6 +347,14 @@ MIT License - feel free to use and modify for your projects.
 **⭐ If this script saved you time, please star the repository!**
 
 ## Changelog
+
+### v1.0.1
+- **Fixed backup logic bug** - only creates tar.gz locally, proper folder+tar.gz remotely
+- **Added config.sh file** - centralized configuration, no need to edit script files
+- **Fixed timestamp bug** - no longer adds timestamp when folder doesn't exist remotely
+- **Dynamic script naming** - batch file reads script name from config
+- **Enhanced remote backups** - creates both tar.gz and folder backups on server
+- **Improved documentation** - added usage summary and configuration guide
 
 ### v1.0.0
 - Initial release with basic deployment functionality
