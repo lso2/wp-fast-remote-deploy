@@ -7,13 +7,13 @@
 
 # Script Configuration
 SCRIPT_NAME="deploy-wsl.sh"  # Name of the deployment script
-VERSION="1.0.3"              # Script version
+VERSION="1.0.4"              # Script version
 
 # ============================================================================
 # PLUGIN CONFIGURATION - Quickly switch between plugins
 # ============================================================================
 
-PLUGIN_FOLDER="your-plugin-folder"  # Change this to switch plugins instantly
+PLUGIN_NAME="your-plugin-name"  # Change this to switch plugins instantly
 
 # ============================================================================
 # BASE PATHS - Set once, used for all plugins
@@ -30,7 +30,6 @@ SSH_HOST="your-server-ip"
 SSH_PORT="22"
 SSH_USER="username"
 SSH_KEY="~/.ssh/id_rsa"
-
 
 # ============================================================================
 # Other Settings (Optional)
@@ -49,8 +48,7 @@ REMOTE_BACKUP_FOLDER=".backups"
 # ============================================================================
 
 # Build full paths from base paths
-PLUGIN_NAME="$PLUGIN_FOLDER"  # Use folder name as plugin name
-LOCAL_PLUGIN_DIR="$LOCAL_BASE/$PLUGIN_FOLDER"
+LOCAL_PLUGIN_DIR="$LOCAL_BASE/$PLUGIN_NAME"
 BACKUP_DIR="$LOCAL_BASE/$LOCAL_BACKUP_FOLDER"
 REMOTE_PLUGINS_DIR="$REMOTE_BASE/$REMOTE_PLUGINS_FOLDER"
 REMOTE_BACKUP_DIR="$REMOTE_BASE/$REMOTE_BACKUP_FOLDER"

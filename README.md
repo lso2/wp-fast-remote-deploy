@@ -24,7 +24,7 @@ This automates several things to save time:
 
 ## Screenshot
 
-![Screenshot of CMD window on completion](images/screenshot.jpg)
+![Screenshot of CMD window on completion](screen/screen.jpg)
 
 ## Features
 

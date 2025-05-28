@@ -3,7 +3,7 @@ REM WordPress Plugin Fast Deployment Script - Windows Launcher
 REM Created by: lso2 (https://github.com/lso2)
 REM Repository: https://github.com/lso2/wp-fast-remote-deploy
 REM License: MIT
-REM Version: 1.0.1
+REM Version: 1.0.3
 
 cd /d "%~dp0"
 echo Starting plugin deployment from %CD%...
@@ -26,12 +26,7 @@ set "PERL_BADLANG=0"
 
 echo Converted path: %WSL_DIR%
 
-REM Get script name from config
-for /f "tokens=2 delims==" %%i in ('findstr "SCRIPT_NAME=" config.sh') do set "SCRIPT_NAME=%%i"
-REM Remove quotes if present
-set "SCRIPT_NAME=%SCRIPT_NAME:"=%"
-
-wsl -e bash -c "export PERL_BADLANG=0 && cd '%WSL_DIR%' && chmod +x ./.run/%SCRIPT_NAME% && ./.run/%SCRIPT_NAME%"
+wsl -e bash -c "export PERL_BADLANG=0 && cd '%WSL_DIR%' && chmod +x ./.run/deploy-wsl.sh && ./.run/deploy-wsl.sh"
 
 set "EXIT_CODE=%errorlevel%"
 
