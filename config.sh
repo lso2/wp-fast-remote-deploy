@@ -10,7 +10,7 @@ SCRIPT_NAME="deploy-wsl.sh"  # Name of the deployment script
 VERSION="1.0.3"              # Script version
 
 # ============================================================================
-# PLUGIN CONFIGURATION - Just change the plugin folder name here!
+# PLUGIN CONFIGURATION - Quickly switch between plugins
 # ============================================================================
 
 PLUGIN_FOLDER="your-plugin-folder"  # Change this to switch plugins instantly
