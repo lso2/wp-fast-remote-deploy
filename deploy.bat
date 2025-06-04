@@ -3,7 +3,6 @@ REM WordPress Plugin Fast Deployment Script - Windows Launcher
 REM Created by: lso2 (https://github.com/lso2)
 REM Repository: https://github.com/lso2/wp-fast-remote-deploy
 REM License: MIT
-REM Version: 1.0.3
 
 cd /d "%~dp0"
 echo Starting plugin deployment from %CD%...

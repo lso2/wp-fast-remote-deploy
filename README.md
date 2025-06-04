@@ -17,14 +17,14 @@ This automates several things to save time:
 ## Usage Summary
 
 - Two files are used: a .bat in the root, and a .sh file in the .run folder.
-- Download the repo and drop it directly into your root, so that the .bat file is in the same folder as your plugin folders.
+- Download the repo and drop it directly into your root, so that the .bat file is in the same folder as your plugin folder.
 - Configure the config.sh file by adding your real paths and server details.
-- **Super simple plugin switching:** Just change `PLUGIN_FOLDER="my-plugin"` to `PLUGIN_FOLDER="my-other-plugin"`
+- In the same file include the folder name of your plugin like your-plugin-folder-name
 - Run the file by double-clicking the .bat file. It will open a CMD window which will show you the progress and details.
 
 ## Screenshot
 
-![Screenshot of CMD window on completion](screen/screen.jpg)
+![Screenshot of CMD window on completion](images/screenshot.jpg)
 
 ## Features
 
@@ -50,6 +50,50 @@ This automates several things to save time:
 - WP-CLI installed on the server (optional but recommended)
 - WordPress plugin with version number in main PHP file
 - SSH key authentication configured (see setup guide below)
+- **pigz** for faster compression (optional, auto-falls back to gzip)
+
+### Installing pigz (Optional - Recommended for Speed)
+
+pigz is a parallel implementation of gzip that provides **2-4x faster compression** on multi-core systems. The script automatically detects and uses pigz if available, otherwise falls back to standard gzip.
+
+**Ubuntu/Debian (WSL):**
+```bash
+sudo apt update && sudo apt install pigz
+```
+
+**CentOS/RHEL/Amazon Linux (WSL):**
+```bash
+sudo yum install pigz
+# or on newer versions:
+sudo dnf install pigz
+```
+
+**Arch Linux (WSL):**
+```bash
+sudo pacman -S pigz
+```
+
+**openSUSE (WSL):**
+```bash
+sudo zypper install pigz
+```
+
+**Remote Server Installation:**
+Install pigz on your remote server using the same commands for your server's Linux distribution.
+
+**Configuration:**
+```bash
+# In config.sh - for pigz (default, faster)
+COMPRESSION_TOOL="pigz"
+
+# In config.sh - for standard gzip
+COMPRESSION_TOOL="gzip"
+```
+
+**Performance Comparison:**
+- **gzip**: Single-threaded, slower but universally available
+- **pigz**: Multi-threaded, 2-4x faster on multi-core systems
+- **Auto-fallback**: Script uses pigz if available, gzip otherwise (no user intervention needed)
 
 ## SSH Key Setup Guide
 
@@ -205,46 +249,65 @@ ssh-add ~/.ssh/id_rsa
 Edit the `config.sh` file in the root directory with your settings:
 
 ```bash
-# PLUGIN CONFIGURATION - Just change the plugin folder name here!
-PLUGIN_FOLDER="your-plugin-folder"  # Change this to switch plugins instantly
+# Plugin Configuration
+PLUGIN_NAME="your-plugin-name"
+LOCAL_PLUGIN_DIR="/mnt/c/path/to/your/plugin/$PLUGIN_NAME"
+BACKUP_DIR="/mnt/c/path/to/your/plugin/_plugin_backups"
+AUTO_CLOSE=false
 
-# Local Environment
-LOCAL_BASE="/mnt/c/path/to/your/plugins"
-LOCAL_BACKUP_FOLDER=".plugin_backups"  # Folder name for backups
-
-# Remote Environment  
-REMOTE_BASE="/path/to/wordpress/root"
-REMOTE_PLUGINS_FOLDER="wp-content/plugins"
-REMOTE_BACKUP_FOLDER=".backups"
-
-# SSH Configuration
+# SSH Configuration  
 SSH_HOST="your-server-ip"
 SSH_PORT="22"
 SSH_USER="username"
 SSH_KEY="~/.ssh/id_rsa"
+REMOTE_PLUGINS_DIR="/path/to/wp-content/plugins"
+REMOTE_BACKUP_DIR="/path/to/wp-content/plugin-backups"
+WP_PATH="/path/to/wordpress/root"
+
+# Performance Options (all default to false = enabled)
+SKIP_WP_CLI=false                    # Skip WP-CLI plugin deactivation/reactivation
+SKIP_REMOTE_TAR_BACKUP=false         # Skip creating remote tar.gz backup
+SKIP_REMOTE_FOLDER_RENAME=false      # Skip renaming remote folder backup
+SKIP_FILE_COUNT_VERIFICATION=true    # Skip slow file count comparison
+
+# Compression Settings
+COMPRESSION_TOOL="pigz"              # pigz (parallel/faster) or gzip (standard)
+COMPRESSION_LEVEL=1                  # 1=fastest, 9=best compression
 ```
 
-### Streamlined Path Management
+## Performance Optimization
 
-**No path repetition!** Set base paths once:
-- **Local:** `/mnt/c/path/to/your/plugins/`
-- **Remote:** `/path/to/wordpress/root/`
+### Speed vs Safety Modes
 
-**Automatic path building:**
-- `LOCAL_PLUGIN_DIR` = `LOCAL_BASE` + `PLUGIN_FOLDER`
-- `REMOTE_PLUGINS_DIR` = `REMOTE_BASE` + `wp-content/plugins`
-- `BACKUP_DIR` = `LOCAL_BASE` + `.plugin_backups`
+**Default Mode (Balanced)**
+- All backups enabled
+- Fast compression (level 1)
+- File count verification skipped
+- Typical time: 8-12 seconds
 
-**Easy environment switching:** Change `REMOTE_BASE` to switch between staging/production servers!
+**Ultra-Fast Mode (Maximum Speed)**
+```bash
+SKIP_WP_CLI=true
+SKIP_REMOTE_TAR_BACKUP=true
+SKIP_REMOTE_FOLDER_RENAME=true
+COMPRESSION_LEVEL=1
+```
+- Only essential operations
+- Typical time: 3-5 seconds
+- Use for rapid development iterations
 
-### Super Simple Plugin Switching
-
-To switch between plugins:
-1. Open `config.sh`
-2. Change `PLUGIN_FOLDER="my-plugin"` to `PLUGIN_FOLDER="my-other-plugin"`
-3. Save and run `deploy.bat`
-
-**No complex definitions needed!** Just use your actual plugin folder names.
+**Safe Mode (Maximum Backups)**
+```bash
+SKIP_WP_CLI=false
+SKIP_REMOTE_TAR_BACKUP=false
+SKIP_REMOTE_FOLDER_RENAME=false
+SKIP_FILE_COUNT_VERIFICATION=false
+COMPRESSION_LEVEL=6
+```
+- All backups and verification enabled
+- Better compression
+- Typical time: 15-20 seconds
+- Use for production deployments
 
 ## Usage
 
@@ -289,18 +352,23 @@ define('PLUGIN_VERSION', '1.2.3');
 ### Local Backups
 ```
 _plugin_backups/
-├── plugin-name.1.0.0.tar.gz
-├── plugin-name.1.0.0-143022/
-├── plugin-name.1.0.1.tar.gz
-├── plugin-name.1.0.1-151205/
+└── backups_plugin-name/
+    ├── plugin-name.1.0.0-143022.tar.gz
+    ├── plugin-name.1.0.1-151205.tar.gz
+    └── plugin-name.1.0.2-162845.tar.gz
 ```
 
 ### Remote Backups
 ```
-wp-content/plugins/
-├── plugin-name/           # Current version
-├── plugin-name.1.0.0/     # Previous version backup
-├── plugin-name.1.0.1-143022/  # Duplicate version with timestamp
+wp-content/
+├── plugins/
+│   ├── plugin-name/           # Current version
+│   ├── plugin-name.1.0.0/     # Previous version backup
+│   └── plugin-name.1.0.1-143022/  # Duplicate version with timestamp
+└── .backups/
+    └── backups_plugin-name/
+        ├── plugin-name.1.0.0-143022.tar.gz
+        └── plugin-name.1.0.1-151205.tar.gz
 ```
 
 ## Performance
@@ -372,6 +440,39 @@ MIT License - feel free to use and modify for your projects.
 **⭐ If this script saved you time, please star the repository!**
 
 ## Changelog
+
+### v1.3.0
+- **Added pigz support** - Much faster parallel compression (default) with automatic fallback to gzip
+- **Configurable compression tool** - Choose between pigz (multi-threaded) or gzip (standard)
+- **Significant speed improvement** - pigz can be 2-4x faster than gzip on multi-core systems
+- **Automatic detection** - Falls back to gzip gracefully if pigz is not installed
+- **Both local and remote** - Uses selected compression tool for all tar operations
+
+### v1.2.1
+- **Fixed compression level syntax** - Corrected tar compression level implementation using GZIP environment variable
+- **Resolved tar options error** - Fixed "Options not supported" error when using custom compression levels
+
+### v1.2.0
+- **Added comprehensive performance options** - New config flags for skipping WP-CLI, remote backups, and folder renaming
+- **Configurable compression levels** - Set compression from 1 (fastest) to 9 (best compression)
+- **Better temp file naming** - Upload files now use plugin name (e.g., `tr-donate-upload-123456.tar.gz`)
+- **Smarter output messages** - Shows appropriate messages when operations are skipped
+- **Faster verification** - Optimized file existence check
+- **Ultra-fast mode support** - Can skip all backups for maximum deployment speed
+
+### v1.1.0
+- **Added optional file count verification** - New `SKIP_FILE_COUNT_VERIFICATION` config option (default: true)
+- **Significantly faster deployments** - Skips slow recursive file counting by default
+- **Smart verification** - Still verifies main plugin file exists for deployment confirmation
+- **Configurable verification** - Set to false if you want detailed file count comparison
+- **Performance improvement** - Reduces verification time from 10-15 seconds to <1 second
+
+### v1.0.8
+- **Fixed remote version detection** - Now properly extracts version from remote plugin files
+- **Enhanced backup naming** - Remote backups use actual remote version instead of new local version
+- **Added fallback handling** - Uses "old" as fallback when version detection fails
+- **Improved regex pattern** - Better version number detection with case-insensitive matching
+- **Fixed quote escaping** - Resolved bash syntax errors in SSH commands
 
 ### v1.0.1
 - **Fixed backup logic bug** - only creates tar.gz locally, proper folder+tar.gz remotely
