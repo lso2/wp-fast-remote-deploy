@@ -1,9 +1,15 @@
-# Ultra Fast WordPress Plugin Deployment Script
+# Fast WordPress Plugin Deployment Script
+
+A time-saving one-click deployment script for local WordPress plugin development, eliminates manual file copying and plugin reactivation; uses wp-cli for automatic plugin deactivation and reactivation (for initilization) with automatic local and remote backups, fallbacks, and easy setup using a config file.
+
+![Windows](https://img.shields.io/badge/Windows-10%2B-blue.svg)
+![WordPress](https://img.shields.io/badge/WordPress-5.0%2B-21759B.svg)
+![Version](https://img.shields.io/badge/Version-1.5.4-green.svg)
+![License](https://img.shields.io/badge/License-GPLv3-orange.svg)
 
 > **Created by:** [lso2](https://github.com/lso2)  
-> **Repository:** [wp-fast-remote-deploy](https://github.com/lso2/wp-fast-remote-deploy)
+> **Repository:** [wp-fast-remote-deploy](https://github.com/lso2/wp-fast-remote-deploy
 
-A time-saving deployment script for WordPress plugin development that eliminates manual file copying and provides one-click deployment with automatic backups.
 
 ## Summary
 
@@ -22,11 +28,11 @@ This automates several things to save time:
 - In the same file include the folder name of your plugin like your-plugin-folder-name
 - Run the file by double-clicking the .bat file. It will open a CMD window which will show you the progress and details.
 
-## Screenshot
+## 📸 Screenshot
 
 ![Screenshot of CMD window on completion](images/screenshot.jpg)
 
-## Features
+## 🚀 Features
 
 - ⚡ **Fast Deployment** - SSH multiplexing and parallel operations
 - 🔄 **Automatic Plugin Management** - Deactivates/reactivates plugins via WP-CLI
