@@ -15,18 +15,23 @@ A time-saving one-click deployment script for local WordPress plugin development
 
 This automates several things to save time:
 - Backs up the local folder to a .tar.gz
-- Backs up the remote folder by renaming it by appending the version number  
-- Copies the folder locally to the WP plugin directory quickly using a temporary .tar.gz and unpacking remotely
+- Backs up the remote folder to a .tar.gz
+- Renames remote folder by appending the version number for quick reverting during testing
+- Copies the folder quickly from local to remote to the WP plugin directory using a temporary .tar.gz and unpacking remotely
 - Deactivates and reactivates the plugin using WP-CLI, to help re-initialize it
 - Gives a summary of what was done
 
-## Usage Summary
+## Quick Usage Summary
 
 - Two files are used: a .bat in the root, and a .sh file in the .run folder.
-- Download the repo and drop it directly into your root, so that the .bat file is in the same folder as your plugin folder.
+- Download the repo and drop it directly into your root, so that the .bat file and config file are in the same folder as your plugin folder.
 - Configure the config.sh file by adding your real paths and server details.
-- In the same file include the folder name of your plugin like your-plugin-folder-name
-- Run the file by double-clicking the .bat file. It will open a CMD window which will show you the progress and details.
+- In the config file:
+	- Include the folder name of your plugin like your-plugin-folder-name
+	- Update the local and remote backup paths
+	- Set up your ssh connection
+	- Optionally, you can also customize many things, or leave it as is. Remote tar.gz is disabled by default for speed.
+- Run the script by double-clicking the .bat file. It will open a CMD window which will show you the progress and details.
 
 ## 📸 Screenshot
 
@@ -57,49 +62,6 @@ This automates several things to save time:
 - WordPress plugin with version number in main PHP file
 - SSH key authentication configured (see setup guide below)
 - **pigz** for faster compression (optional, auto-falls back to gzip)
-
-### Installing pigz (Optional - Recommended for Speed)
-
-pigz is a parallel implementation of gzip that provides **2-4x faster compression** on multi-core systems. The script automatically detects and uses pigz if available, otherwise falls back to standard gzip.
-
-**Ubuntu/Debian (WSL):**
-```bash
-sudo apt update && sudo apt install pigz
-```
-
-**CentOS/RHEL/Amazon Linux (WSL):**
-```bash
-sudo yum install pigz
-# or on newer versions:
-sudo dnf install pigz
-```
-
-**Arch Linux (WSL):**
-```bash
-sudo pacman -S pigz
-```
-
-**openSUSE (WSL):**
-```bash
-sudo zypper install pigz
-```
-
-**Remote Server Installation:**
-Install pigz on your remote server using the same commands for your server's Linux distribution.
-
-**Configuration:**
-```bash
-# In config.sh - for pigz (default, faster)
-COMPRESSION_TOOL="pigz"
-
-# In config.sh - for standard gzip
-COMPRESSION_TOOL="gzip"
-```
-
-**Performance Comparison:**
-- **gzip**: Single-threaded, slower but universally available
-- **pigz**: Multi-threaded, 2-4x faster on multi-core systems
-- **Auto-fallback**: Script uses pigz if available, gzip otherwise (no user intervention needed)
 
 ## SSH Key Setup Guide
 
@@ -211,6 +173,49 @@ Now you can connect with just:
 ```bash
 ssh myserver
 ```
+
+### Installing pigz (Optional - Recommended for Speed)
+
+pigz is a parallel implementation of gzip that provides **2-4x faster compression** on multi-core systems. The script automatically detects and uses pigz if available, otherwise falls back to standard gzip.
+
+**Ubuntu/Debian (WSL):**
+```bash
+sudo apt update && sudo apt install pigz
+```
+
+**CentOS/RHEL/Amazon Linux (WSL):**
+```bash
+sudo yum install pigz
+# or on newer versions:
+sudo dnf install pigz
+```
+
+**Arch Linux (WSL):**
+```bash
+sudo pacman -S pigz
+```
+
+**openSUSE (WSL):**
+```bash
+sudo zypper install pigz
+```
+
+**Remote Server Installation:**
+Install pigz on your remote server using the same commands for your server's Linux distribution.
+
+**Configuration:**
+```bash
+# In config.sh - for pigz (default, faster)
+COMPRESSION_TOOL="pigz"
+
+# In config.sh - for standard gzip
+COMPRESSION_TOOL="gzip"
+```
+
+**Performance Comparison:**
+- **gzip**: Single-threaded, slower but universally available
+- **pigz**: Multi-threaded, 2-4x faster on multi-core systems
+- **Auto-fallback**: Script uses pigz if available, gzip otherwise (no user intervention needed)
 
 ### Troubleshooting SSH Issues
 
