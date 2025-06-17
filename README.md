@@ -10,7 +10,7 @@ A time-saving one-click deployment script for local WordPress plugin AND theme d
 ![License](https://img.shields.io/badge/License-GPLv3-orange.svg)
 
 > **Created by:** [lso2](https://github.com/lso2)  
-> **Repository:** [wp-fast-remote-deploy](https://github.com/lso2/wp-fast-remote-deploy
+> **Repository:** [wp-fast-remote-deploy](https://github.com/lso2/wp-fast-remote-deploy)
 
 
 ## Summary
@@ -27,7 +27,7 @@ This automates several things to save time:
 - For themes: Deploys and notifies for manual activation (themes can't be auto-activated safely)
 - Gives a summary of what was done
 
-## Quick Usage Summary
+## Quick Usage Guide
 
 - Two files are used: a .bat in the root, and a .sh file in the .run folder.
 - Download the repo and drop it directly into your root, so that the .bat file and config file are in the same folder as your plugin folder.
@@ -40,9 +40,13 @@ This automates several things to save time:
 	- Optionally, you can also customize many things, or leave it as is. Remote tar.gz is disabled by default for speed.
 - Run the script by double-clicking the .bat file. It will open a CMD window which will show you the progress and details.
 
+#### Bonus:
+- Add the right-click menu by double-clicking `/_scripts/_right-click-menu/install-folder-name-changer-menu-item.bat` for quick switching of plugin/theme folders
+- Switch between theme/plugin mode either by editing config or double-clicking on `/scripts/switch-to-plugin-type.bat`
+
 ## New in Version 2.0.1 - Enhanced Configuration & Organization
 
-🔧 **Configuration Improvements**: Enhanced config file organization and path handling!
+🔧 **Configuration Improvements**: Enhanced config file organization and path handling
 
 ### Key Improvements:
 - **Reorganized Config File** - Clear sections: Required Config, One-Time Setup, Optional Settings
