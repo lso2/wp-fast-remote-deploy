@@ -1,14 +1,4 @@
-### Quick Type Switching
-
-Use the batch files in `_type-switcher/` folder:
-
-```cmd
-# Switch to theme mode
-_type-switcher\switch-to-theme-type.bat
-
-# Switch to plugin mode  
-_type-switcher\switch-to-plugin-type.bat
-```
+# Fast WordPress Plugin Deployment Script
 
 These show current TYPE setting and switch it automatically.# Fast WordPress Plugin/Theme Deployment Script
 
@@ -27,6 +17,8 @@ A time-saving one-click deployment script for local WordPress plugin AND theme d
 
 This automates several things to save time:
 - **Unified Plugin/Theme Support** - Works with both WordPress plugins and themes using a single config
+- **Quick Type Switching** - Batch files to instantly switch between plugin and theme modes
+- **Right-Click Integration** - Context menu to instantly update folder names
 - Backs up the local folder to a .tar.gz
 - Backs up the remote folder to a .tar.gz
 - Renames remote folder by appending the version number for quick reverting during testing
@@ -63,7 +55,7 @@ This automates several things to save time:
 
 ## 📸 Screenshot
 
-![Screenshot of CMD window on completion](screen/screen.jpg)
+![Screenshot of CMD window on completion](_scripts/screen/screen.jpg)
 
 ## 🚀 Features
 
@@ -309,6 +301,46 @@ When you right-click on `my-awesome-plugin` and select "Change Folder Name", you
 ```bash
 FOLDER_NAME="my-awesome-plugin"
 ```
+
+### Quick Plugin/Theme Switch Right-Click Integration
+
+```cmd
+# Install the right-click menu for quick folder switch
+_scripts\_right-click-menu\install-folder-name-changer-menu-item.bat
+
+# Uninstall the right-click menu
+_scripts\_right-click-menu\install-folder-name-changer-menu-item.bat
+```
+
+Right-click any folder in the same directory as the deploy and it will rename the deploy to:
+
+```cmd
+DEPLOY__folder-name__type.bat
+```
+
+Where "folder-name" is the name of the plugin or theme folder, and type is either "plugin" or "theme", so you can easily see what you are deploying.
+
+## 📸 Screenshots
+
+![Screenshot of Right-Click Menu](_scripts/screen/screen-menu-item.jpg)
+
+![Screenshot of CMD window on completion](_scripts/screen/screen-menu-item-confirm.jpg)
+
+
+### Quick Type Switching
+
+Use the batch files in `_scripts/` folder:
+
+```cmd
+# Switch to theme mode
+_scripts\switch-to-theme-type.bat
+
+# Switch to plugin mode  
+_scripts\switch-to-plugin-type.bat
+```
+
+These switch current TYPE setting automatically to switch between theme and plugin mode.
+
 
 ### Uninstallation
 - **Run as Administrator**: Right-click `_right-click-menu/uninstall-folder-name-changer-menu-item.bat` and select "Run as administrator"
