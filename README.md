@@ -1,10 +1,22 @@
-# Fast WordPress Plugin Deployment Script
+### Quick Type Switching
 
-A time-saving one-click deployment script for local WordPress plugin development, eliminates manual file copying and plugin reactivation; uses wp-cli for automatic plugin deactivation and reactivation (for initilization) with automatic local and remote backups, fallbacks, and easy setup using a config file.
+Use the batch files in `_type-switcher/` folder:
+
+```cmd
+# Switch to theme mode
+_type-switcher\switch-to-theme-type.bat
+
+# Switch to plugin mode  
+_type-switcher\switch-to-plugin-type.bat
+```
+
+These show current TYPE setting and switch it automatically.# Fast WordPress Plugin/Theme Deployment Script
+
+A time-saving one-click deployment script for local WordPress plugin AND theme development, eliminates manual file copying and activation; uses wp-cli for automatic plugin reactivation with automatic local and remote backups, fallbacks, and easy setup using a unified config file.
 
 ![Windows](https://img.shields.io/badge/Windows-10%2B-blue.svg)
 ![WordPress](https://img.shields.io/badge/WordPress-5.0%2B-21759B.svg)
-![Version](https://img.shields.io/badge/Version-1.5.4-green.svg)
+![Version](https://img.shields.io/badge/Version-2.0.1-green.svg)
 ![License](https://img.shields.io/badge/License-GPLv3-orange.svg)
 
 > **Created by:** [lso2](https://github.com/lso2)  
@@ -14,11 +26,13 @@ A time-saving one-click deployment script for local WordPress plugin development
 ## Summary
 
 This automates several things to save time:
+- **Unified Plugin/Theme Support** - Works with both WordPress plugins and themes using a single config
 - Backs up the local folder to a .tar.gz
 - Backs up the remote folder to a .tar.gz
 - Renames remote folder by appending the version number for quick reverting during testing
-- Copies the folder quickly from local to remote to the WP plugin directory using a temporary .tar.gz and unpacking remotely
-- Deactivates and reactivates the plugin using WP-CLI, to help re-initialize it
+- Copies the folder quickly from local to remote to the WP directory using a temporary .tar.gz and unpacking remotely
+- For plugins: Deactivates and reactivates the plugin using WP-CLI to help re-initialize it
+- For themes: Deploys and notifies for manual activation (themes can't be auto-activated safely)
 - Gives a summary of what was done
 
 ## Quick Usage Summary
@@ -27,11 +41,25 @@ This automates several things to save time:
 - Download the repo and drop it directly into your root, so that the .bat file and config file are in the same folder as your plugin folder.
 - Configure the config.sh file by adding your real paths and server details.
 - In the config file:
-	- Include the folder name of your plugin like your-plugin-folder-name
+	- **Set TYPE** to "plugin" or "theme" depending on what you're deploying
+	- Include the folder name like your-plugin-folder-name or your-theme-folder-name in FOLDER_NAME
 	- Update the local and remote backup paths
 	- Set up your ssh connection
 	- Optionally, you can also customize many things, or leave it as is. Remote tar.gz is disabled by default for speed.
 - Run the script by double-clicking the .bat file. It will open a CMD window which will show you the progress and details.
+
+## New in Version 2.0.1 - Enhanced Configuration & Organization
+
+🔧 **Configuration Improvements**: Enhanced config file organization and path handling!
+
+### Key Improvements:
+- **Reorganized Config File** - Clear sections: Required Config, One-Time Setup, Optional Settings
+- **Drive Letter Variable** - Configurable drive letter instead of hardcoded "C"
+- **Customizable WordPress Folders** - Support for renamed wp-content, plugins, themes folders
+- **Flexible Backup Naming** - Configurable prefix and suffix for backup folders
+- **Improved Path Logic** - Cleaner LOCAL_PATH handling without hardcoded paths
+- **Updated Tools** - Type switcher and right-click menu moved to root with updated paths
+- **Generic Script Name** - deploy-plugin-wsl.sh can be renamed to deploy-wsl.sh (works for both types)
 
 ## 📸 Screenshot
 
@@ -255,28 +283,72 @@ ssh-add ~/.ssh/id_rsa
 3. Set up SSH key authentication to your server
 4. Make the script executable: `chmod +x deploy-wsl.sh`
 
+## Right-Click Menu Integration
+
+For even faster workflow, you can install a Windows right-click context menu that automatically updates the `FOLDER_NAME` in your config.sh file based on the folder you right-click on.
+
+### Installation
+1. **Run as Administrator**: Right-click `_right-click-menu/install-folder-name-changer-menu-item.bat` and select "Run as administrator"
+2. **Confirm installation**: You should see "Installation complete!" message
+
+### Usage
+1. **Right-click any plugin/theme folder** in your development directory
+2. **Select "Change Folder Name"** from the context menu
+3. **Automatic update**: The script will find your `config.sh` file and update `FOLDER_NAME="..."` to match the folder name you clicked
+
+### Example Workflow
+```
+Your Directory Structure:
+├── my-awesome-plugin/     ← Right-click this folder
+├── another-theme/
+├── config.sh              ← FOLDER_NAME gets updated automatically
+└── deploy.bat
+```
+
+When you right-click on `my-awesome-plugin` and select "Change Folder Name", your config.sh will be updated to:
+```bash
+FOLDER_NAME="my-awesome-plugin"
+```
+
+### Uninstallation
+- **Run as Administrator**: Right-click `_right-click-menu/uninstall-folder-name-changer-menu-item.bat` and select "Run as administrator"
+
+### Requirements
+- Windows 10 or later
+- Administrator privileges for installation/uninstallation
+- PowerShell execution policy allows script execution (handled automatically)
+
 ## Configuration
 
 Edit the `config.sh` file in the root directory with your settings:
 
 ```bash
-# Plugin Configuration
-PLUGIN_NAME="your-plugin-name"
-LOCAL_PLUGIN_DIR="/mnt/c/path/to/your/plugin/$PLUGIN_NAME"
-BACKUP_DIR="/mnt/c/path/to/your/plugin/_plugin_backups"
-AUTO_CLOSE=false
+# Type Configuration - CHOOSE YOUR DEPLOYMENT TYPE
+TYPE="plugin"  # Set to "plugin" or "theme"
+
+# Folder Configuration
+FOLDER_NAME="your-plugin-name"  # Change this to switch plugins/themes instantly
+
+# Legacy compatibility (automatically set)
+PLUGIN_NAME="$FOLDER_NAME"  # Backwards compatibility
+
+# Base Paths
+LOCAL_BASE="/mnt/c/path/to/your/plugins"  # For plugins
+# LOCAL_BASE="/mnt/c/path/to/your/themes"   # For themes
 
 # SSH Configuration  
 SSH_HOST="your-server-ip"
 SSH_PORT="22"
 SSH_USER="username"
 SSH_KEY="~/.ssh/id_rsa"
-REMOTE_PLUGINS_DIR="/path/to/wp-content/plugins"
-REMOTE_BACKUP_DIR="/path/to/wp-content/plugin-backups"
-WP_PATH="/path/to/wordpress/root"
+REMOTE_BASE="/path/to/wordpress/root"
+
+# Auto-generated paths (based on TYPE)
+# Plugin mode: uses wp-content/plugins, .plugin_backups, looks for version in FOLDER_NAME.php
+# Theme mode: uses wp-content/themes, .theme_backups, looks for version in style.css
 
 # Performance Options (all default to false = enabled)
-SKIP_WP_CLI=false                    # Skip WP-CLI plugin deactivation/reactivation
+SKIP_WP_CLI=false                    # Skip WP-CLI operations
 SKIP_REMOTE_TAR_BACKUP=false         # Skip creating remote tar.gz backup
 SKIP_REMOTE_FOLDER_RENAME=false      # Skip renaming remote folder backup
 SKIP_FILE_COUNT_VERIFICATION=true    # Skip slow file count comparison
@@ -284,6 +356,24 @@ SKIP_FILE_COUNT_VERIFICATION=true    # Skip slow file count comparison
 # Compression Settings
 COMPRESSION_TOOL="pigz"              # pigz (parallel/faster) or gzip (standard)
 COMPRESSION_LEVEL=1                  # 1=fastest, 9=best compression
+```
+
+### Version Detection
+
+**For Plugins** - Looks for version in main plugin file (FOLDER_NAME.php):
+```php
+/*
+Plugin Name: My Plugin
+Version: 1.2.3
+*/
+```
+
+**For Themes** - Looks for version in style.css:
+```css
+/*
+Theme Name: My Theme
+Version: 1.2.3
+*/
 ```
 
 ## Performance Optimization
@@ -335,18 +425,19 @@ deploy.bat
 
 ## How It Works
 
-1. **Version Detection** - Automatically extracts version from plugin's main PHP file
+1. **Version Detection** - Automatically extracts version from plugin's main PHP file OR theme's style.css
 2. **Local Backups** - Creates timestamped folder and tar.gz backups
-3. **Remote Preparation** - Connects via SSH, deactivates plugin, renames existing installation
+3. **Remote Preparation** - Connects via SSH, handles deactivation based on type, renames existing installation
 4. **Fast Upload** - Uses tar.gz compression for quick file transfer
-5. **Extraction** - Extracts files directly on server
-6. **Reactivation** - Automatically reactivates the plugin via WP-CLI
-7. **Verification** - Confirms deployment success with file count comparison
+5. **Extraction** - Extracts files directly on server to correct directory (plugins or themes)
+6. **Activation** - For plugins: automatically reactivates via WP-CLI; For themes: deploys ready for manual activation
+7. **Verification** - Confirms deployment success with appropriate file check
 
 ## Version Number Detection
 
-The script automatically detects version numbers from these formats in your main plugin file:
+The script automatically detects version numbers from these formats:
 
+**For Plugins** (in main plugin PHP file):
 ```php
 // WordPress standard
 Version: 1.2.3
@@ -358,15 +449,32 @@ Version: 1.2.3
 define('PLUGIN_VERSION', '1.2.3');
 ```
 
+**For Themes** (in style.css):
+```css
+/*
+Theme Name: Twenty Twenty-Four
+Version: 1.2.3
+Author: WordPress Team
+*/
+```
+
 ## Backup Organization
 
 ### Local Backups
 ```
-_plugin_backups/
+# Plugin backups
+.plugin_backups/
 └── backups_plugin-name/
     ├── plugin-name.1.0.0-143022.tar.gz
     ├── plugin-name.1.0.1-151205.tar.gz
     └── plugin-name.1.0.2-162845.tar.gz
+
+# Theme backups    
+.theme_backups/
+└── backups_theme-name/
+    ├── theme-name.2.1.0-143022.tar.gz
+    ├── theme-name.2.1.1-151205.tar.gz
+    └── theme-name.2.1.2-162845.tar.gz
 ```
 
 ### Remote Backups
@@ -376,10 +484,17 @@ wp-content/
 │   ├── plugin-name/           # Current version
 │   ├── plugin-name.1.0.0/     # Previous version backup
 │   └── plugin-name.1.0.1-143022/  # Duplicate version with timestamp
+├── themes/
+│   ├── theme-name/            # Current version
+│   ├── theme-name.2.1.0/      # Previous version backup
+│   └── theme-name.2.1.1-143022/   # Duplicate version with timestamp
 └── .backups/
-    └── backups_plugin-name/
-        ├── plugin-name.1.0.0-143022.tar.gz
-        └── plugin-name.1.0.1-151205.tar.gz
+    ├── backups_plugin-name/
+    │   ├── plugin-name.1.0.0-143022.tar.gz
+    │   └── plugin-name.1.0.1-151205.tar.gz
+    └── backups_theme-name/
+        ├── theme-name.2.1.0-143022.tar.gz
+        └── theme-name.2.1.1-151205.tar.gz
 ```
 
 ## Performance
@@ -413,18 +528,26 @@ Speed improvements come from:
 - Verify SSH user has proper permissions
 
 ### Version Detection Fails
-- Ensure your main plugin file has a version number in supported format
-- Check file is named correctly (matches PLUGIN_NAME variable)
+- **For plugins**: Ensure your main plugin file has a version number in supported format
+- **For themes**: Ensure your style.css has proper WordPress theme header with Version field
+- Check file is named correctly (matches FOLDER_NAME variable)
 - Verify file is readable and properly formatted
+- For themes, style.css must be in the root of the theme folder
 
 ## File Structure
 
 ```
 project/
 ├── deploy.bat              # Windows batch script
-├── config.sh               # Configuration file
+├── config.sh               # Unified configuration file
 ├── .run/
-│   └── deploy-wsl.sh      # Main deployment script
+│   └── deploy-wsl.sh       # Main deployment script (works for both plugins and themes)
+├── _type-switcher/         # Quick TYPE switching
+│   ├── switch-to-theme-type.bat    # Switch to theme mode
+│   └── switch-to-plugin-type.bat   # Switch to plugin mode
+├── _right-click-menu/      # Right-click menu integration
+│   ├── install-folder-name-changer-menu-item.bat    # Install right-click menu
+│   └── uninstall-folder-name-changer-menu-item.bat  # Remove right-click menu
 └── README.md              # This file
 ```
 
@@ -451,6 +574,79 @@ MIT License - feel free to use and modify for your projects.
 **⭐ If this script saved you time, please star the repository!**
 
 ## Changelog
+
+### v2.0.1 - Enhanced Configuration & Organization
+- **📁 Directory Reorganization** - Moved `_type-switcher` and `_right-click-menu` to root directory with `_` prefix
+- **🔧 Enhanced Config File** - Better organization with clear Required/One-Time Setup/Optional sections
+- **💾 Drive Letter Configuration** - Configurable `DRIVE_LETTER` variable instead of hardcoded "C" drive
+- **📂 Custom WordPress Folders** - Support for renamed `wp-content`, `plugins`, `themes` folders via config variables
+- **🎯 Flexible Backup Naming** - Configurable `PREFIX` and `LOCAL_BAK_SUFFIX` for backup folder customization
+- **🛠️ Updated Right-Click Menu** - Now updates `FOLDER_NAME` instead of deprecated `PLUGIN_NAME` variable
+- **⚡ Path Logic Improvements** - Cleaner `LOCAL_PATH` handling without hardcoded paths or leading slashes
+- **🔄 Type Switcher Updates** - Fixed paths for root directory placement and updated user guidance
+- **📜 Script Naming** - `deploy-plugin-wsl.sh` can be renamed to generic `deploy-wsl.sh` (works for both types)
+- **🧹 Code Cleanup** - Better variable organization and dependency order in config file
+
+### v1.6.2
+- **Fixed pigz compression issue** - Resolved 0KB tar files when using pigz compression
+- **Corrected pigz filename handling** - Fixed double .gz extension issue (file.tar.gz.gz)
+- **Improved pigz implementation** - Create uncompressed tar first, then compress with pigz separately
+- **Enhanced compression reliability** - Better error handling for pigz vs gzip operations
+- **Fixed remote folder rename logic** - Resolved issue where folder rename was skipped when tar backup was disabled
+
+### v1.6.1
+- **Improved pigz error handling** - Better fallback mechanisms when pigz encounters issues
+- **Enhanced compression debugging** - Added better error reporting for compression operations
+- **Fixed tar command syntax** - Resolved pigz parameter passing issues
+- **Stability improvements** - More robust compression tool detection and usage
+
+### v1.6.0
+- **Added right-click menu integration** - Windows context menu for instant plugin name switching
+- **Automatic config.sh updates** - Right-click any plugin folder to update PLUGIN_NAME automatically
+- **PowerShell-based solution** - Robust file modification with error handling and user feedback
+- **Visual confirmation dialogs** - Success/error messages with detailed debugging information
+- **Easy installation/removal** - Administrator batch scripts for clean context menu management
+- **Screenshots added** - Visual documentation showing context menu and confirmation dialogs
+- **Enhanced workflow** - No more manual config.sh editing when switching between plugins
+
+### v1.5.4
+- **Fixed remote folder rename display** - Now shows exact folder name including timestamp when applicable
+- **Enhanced backup reporting** - Changed label from "folder:" to "Remote folder renamed to:"
+- **Improved folder tracking** - Better detection of whether timestamp was appended to folder name
+- **Cleaner output formatting** - More precise and informative backup summary messages
+
+### v1.5.3
+- **Implemented plugin-specific backup subfolders** - Actually creates and uses `/backups_plugin-name/` directories
+- **Fixed backup directory creation** - Ensures plugin-specific folders are properly created both locally and remotely
+- **Updated backup paths** - All backup operations now use the correct subfolder structure
+- **Verified backup organization** - Confirmed backups are properly separated by plugin name
+
+### v1.5.2
+- **Comprehensive pigz documentation** - Added detailed installation instructions for multiple Linux distributions
+- **Enhanced README** - Improved pigz setup guide with performance comparisons
+- **Better user guidance** - Clear instructions for both WSL and remote server pigz installation
+- **Configuration examples** - Added clear examples of compression tool settings
+
+### v1.5.1
+- **Fixed pigz installation logic** - Removed automatic installation attempts that required sudo prompts
+- **Silent compression handling** - Script now quietly uses available compression without user intervention
+- **Removed fallback messages** - Clean output with no "pigz not available" warnings
+- **Enhanced user experience** - No more interruptions or confusing installation messages
+- **Documentation improvements** - Added comprehensive pigz installation guide for manual setup
+
+### v1.5.0
+- **Plugin-specific backup folders** - Local and remote backups now organized in `/backups_plugin-name/` subfolders
+- **Better backup organization** - Each plugin's backups are cleanly separated from others
+- **Improved backup paths** - Eliminates backup file conflicts between multiple plugins
+- **Enhanced remote folder tracking** - Better display of actual renamed folder paths with timestamps
+- **Fixed backup directory structure** - Consistent organization across local and remote backups
+
+### v1.4.0
+- **Enhanced pigz integration** - Improved parallel compression with better error handling
+- **Automatic compression detection** - Script intelligently selects best available compression method
+- **Performance optimizations** - Further speed improvements in backup and upload operations
+- **Better compression feedback** - Clear indication of compression method being used
+- **Stability improvements** - More robust handling of compression tool availability
 
 ### v1.3.0
 - **Added pigz support** - Much faster parallel compression (default) with automatic fallback to gzip

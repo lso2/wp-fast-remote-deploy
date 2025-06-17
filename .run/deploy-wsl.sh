@@ -36,7 +36,7 @@ NC='\033[0m' 					# No Color
 echo ""
 echo -e "${GREY} Deployment script v$VERSION${NC}"
 echo ""
-echo -e "${PINK}+  Deploy:${NC} ${GOLD}$PLUGIN_NAME${NC}"
+echo -e "${PINK}+  Deploy $TYPE:${NC} ${GOLD}$FOLDER_NAME${NC}"
 
 # Start SSH connection in background immediately
 {
@@ -53,15 +53,24 @@ if [[ "$COMPRESSION_TOOL" == "pigz" ]]; then
     fi
 fi
 
-# Extract version quickly (single grep)
-PLUGIN_VERSION=$(grep -m1 "Version:" "$LOCAL_PLUGIN_DIR/$PLUGIN_NAME.php" | sed 's/.*Version:[[:space:]]*\([0-9.]*\).*/\1/' | tr -d "\"' ")
+# Extract version based on type
+if [[ "$TYPE" == "theme" ]]; then
+    # For themes, check style.css
+    VERSION_NUMBER=$(grep -m1 "Version:" "$LOCAL_TARGET_DIR/style.css" | sed 's/.*Version:[[:space:]]*\([0-9.]*\).*/\1/' | tr -d "\"' ")
+else
+    # For plugins, check main plugin file
+    VERSION_NUMBER=$(grep -m1 "Version:" "$LOCAL_TARGET_DIR/$FOLDER_NAME.php" | sed 's/.*Version:[[:space:]]*\([0-9.]*\).*/\1/' | tr -d "\"' ")
+fi
 
-if [[ -z "$PLUGIN_VERSION" ]]; then
-    echo -e "${RED}+ No plugin version found${NC}"
+if [[ -z "$VERSION_NUMBER" ]]; then
+    echo -e "${RED}+ No $TYPE version found${NC}"
     exit 1
 fi
 
-echo -e "${PINK}+  Plugin Version:${NC} ${WHITE}$PLUGIN_VERSION${NC}"
+# Legacy compatibility
+PLUGIN_VERSION="$VERSION_NUMBER"
+
+echo -e "${PINK}+  ${TYPE^} Version:${NC} ${WHITE}$VERSION_NUMBER${NC}"
 echo ""
 
 # Create backup directories
@@ -71,27 +80,27 @@ TIMESTAMP=$(date +%H%M%S)
 # Only create tar.gz backup locally (no folder copy)
 echo -e "${PURPLE}+  Creating local backup...${NC}"
 {
-    cd "$(dirname "$LOCAL_PLUGIN_DIR")"
+    cd "$(dirname "$LOCAL_TARGET_DIR")"
     
     # Create tar.gz backup only locally
-    TARGZ_NAME="$PLUGIN_NAME.$PLUGIN_VERSION-$TIMESTAMP.tar.gz"
+    TARGZ_NAME="$FOLDER_NAME.$VERSION_NUMBER-$TIMESTAMP.tar.gz"
     if [[ "$COMPRESSION_TOOL" == "pigz" && "$PIGZ_AVAILABLE" == "true" ]]; then
         # Use pigz
-        tar --use-compress-program="pigz -$COMPRESSION_LEVEL" -cf "$BACKUP_DIR/$TARGZ_NAME" "$(basename "$LOCAL_PLUGIN_DIR")" &
+        tar --use-compress-program="pigz -$COMPRESSION_LEVEL" -cf "$BACKUP_DIR/$TARGZ_NAME" "$(basename "$LOCAL_TARGET_DIR")" &
     else
         # Use gzip (either configured or fallback)
-        tar -cf "$BACKUP_DIR/$TARGZ_NAME" "$(basename "$LOCAL_PLUGIN_DIR")" --use-compress-program="gzip -$COMPRESSION_LEVEL" &
+        tar -cf "$BACKUP_DIR/$TARGZ_NAME" "$(basename "$LOCAL_TARGET_DIR")" --use-compress-program="gzip -$COMPRESSION_LEVEL" &
     fi
     TARGZ_PID=$!
     
     # Create upload archive (background)
-    TEMP_TAR="/tmp/$PLUGIN_NAME-upload-$TIMESTAMP.tar.gz"
+    TEMP_TAR="/tmp/$FOLDER_NAME-upload-$TIMESTAMP.tar.gz"
     if [[ "$COMPRESSION_TOOL" == "pigz" && "$PIGZ_AVAILABLE" == "true" ]]; then
         # Use pigz
-        tar --use-compress-program="pigz -$COMPRESSION_LEVEL" -cf "$TEMP_TAR" "$(basename "$LOCAL_PLUGIN_DIR")" &
+        tar --use-compress-program="pigz -$COMPRESSION_LEVEL" -cf "$TEMP_TAR" "$(basename "$LOCAL_TARGET_DIR")" &
     else
         # Use gzip (either configured or fallback)
-        tar -cf "$TEMP_TAR" "$(basename "$LOCAL_PLUGIN_DIR")" --use-compress-program="gzip -$COMPRESSION_LEVEL" &
+        tar -cf "$TEMP_TAR" "$(basename "$LOCAL_TARGET_DIR")" --use-compress-program="gzip -$COMPRESSION_LEVEL" &
     fi
     UPLOAD_PID=$!
 }
@@ -123,54 +132,60 @@ WP_CLI_CHECK=$(ssh $SSH_OPTS "$SSH_USER@$SSH_HOST" "
     fi
     
     # Prepare directories
-    mkdir -p '$REMOTE_PLUGINS_DIR'
+    mkdir -p '$REMOTE_TARGET_DIR'
     mkdir -p '$REMOTE_BACKUP_DIR'
     
-    # Check WP-CLI
+    # Check WP-CLI and handle deactivation based on type
     if [ '$SKIP_WP_CLI' != 'true' ] && which wp >/dev/null 2>&1; then
         echo 'wp_available'
-        # Deactivate plugin
-        cd '$WP_PATH' && wp plugin deactivate '$PLUGIN_NAME' --allow-root >/dev/null 2>&1 || true
+        # For themes, we don't deactivate (can't deactivate active theme)
+        # For plugins, deactivate before deployment
+        if [ '$TYPE' = 'plugin' ]; then
+            cd '$WP_PATH' && wp plugin deactivate '$FOLDER_NAME' --allow-root >/dev/null 2>&1 || true
+        fi
     else
         echo 'wp_not_found'
     fi
     
     # Handle existing remote folder
-    if [ -d '$REMOTE_PLUGINS_DIR/$PLUGIN_NAME' ]; then
-        # Get current remote plugin version first
-        REMOTE_VERSION=\$(grep -i version '$REMOTE_PLUGINS_DIR/$PLUGIN_NAME/$PLUGIN_NAME.php' | head -1 | grep -o '[0-9]\+\.[0-9]\+\.*[0-9]*' | head -1)
+    if [ -d '$REMOTE_TARGET_DIR/$FOLDER_NAME' ]; then
+        # Get current remote version based on type
+        if [ '$TYPE' = 'theme' ]; then
+            REMOTE_VERSION=\$(grep -i version '$REMOTE_TARGET_DIR/$FOLDER_NAME/style.css' | head -1 | grep -o '[0-9]\+\.[0-9]\+\.*[0-9]*' | head -1)
+        else
+            REMOTE_VERSION=\$(grep -i version '$REMOTE_TARGET_DIR/$FOLDER_NAME/$FOLDER_NAME.php' | head -1 | grep -o '[0-9]\+\.[0-9]\+\.*[0-9]*' | head -1)
+        fi
         if [ -z "\$REMOTE_VERSION" ]; then
             REMOTE_VERSION=old
         fi
         
-        # Create remote tar.gz backup first
+        # Create remote tar.gz backup BEFORE renaming folder
         if [ '$SKIP_REMOTE_TAR_BACKUP' != 'true' ]; then
-            cd '$REMOTE_PLUGINS_DIR'
             if [ \"\$REMOTE_PIGZ\" = 'true' ]; then
-                tar --use-compress-program='pigz -'\$COMPRESSION_LEVEL -cf '$REMOTE_BACKUP_DIR/$PLUGIN_NAME.'\$REMOTE_VERSION'-$TIMESTAMP.tar.gz' '$PLUGIN_NAME' &
+                tar -cf '$REMOTE_BACKUP_DIR/$FOLDER_NAME.'\$REMOTE_VERSION'-$TIMESTAMP.tar' -C '$REMOTE_TARGET_DIR' '$FOLDER_NAME' &
+                PIGZ_PID=\$!
+                wait \$PIGZ_PID
+                pigz -f '$REMOTE_BACKUP_DIR/$FOLDER_NAME.'\$REMOTE_VERSION'-$TIMESTAMP.tar'
             else
-                tar -cf '$REMOTE_BACKUP_DIR/$PLUGIN_NAME.'\$REMOTE_VERSION'-$TIMESTAMP.tar.gz' '$PLUGIN_NAME' --use-compress-program='gzip -'\$COMPRESSION_LEVEL &
+                tar -czf '$REMOTE_BACKUP_DIR/$FOLDER_NAME.'\$REMOTE_VERSION'-$TIMESTAMP.tar.gz' -C '$REMOTE_TARGET_DIR' '$FOLDER_NAME' &
             fi
             TAR_PID=\$!
+            # Wait for tar to complete before moving folder
+            wait \$TAR_PID
         fi
         
-        # Rename existing folder 
+        # Then rename folder
         if [ '$SKIP_REMOTE_FOLDER_RENAME' != 'true' ]; then
-            if [ -d '$REMOTE_PLUGINS_DIR/$PLUGIN_NAME.'\$REMOTE_VERSION ]; then
-                mv '$PLUGIN_NAME' '$PLUGIN_NAME.'\$REMOTE_VERSION'-$TIMESTAMP'
+            if [ -d '$REMOTE_TARGET_DIR/$FOLDER_NAME.'\$REMOTE_VERSION ]; then
+                mv '$REMOTE_TARGET_DIR/$FOLDER_NAME' '$REMOTE_TARGET_DIR/$FOLDER_NAME.'\$REMOTE_VERSION'-$TIMESTAMP'
                 echo 'backed_up_and_renamed:'\$REMOTE_VERSION':with_timestamp'
             else
-                mv '$PLUGIN_NAME' '$PLUGIN_NAME.'\$REMOTE_VERSION
+                mv '$REMOTE_TARGET_DIR/$FOLDER_NAME' '$REMOTE_TARGET_DIR/$FOLDER_NAME.'\$REMOTE_VERSION
                 echo 'backed_up_and_renamed:'\$REMOTE_VERSION':no_timestamp'
             fi
         else
-            rm -rf '$PLUGIN_NAME'
+            rm -rf '$REMOTE_TARGET_DIR/$FOLDER_NAME'
             echo 'backed_up_and_renamed:'\$REMOTE_VERSION':deleted'
-        fi
-        
-        # Wait for backup to complete if created
-        if [ '$SKIP_REMOTE_TAR_BACKUP' != 'true' ]; then
-            wait \$TAR_PID
         fi
     else
         echo 'no_existing'
@@ -190,8 +205,8 @@ fi
 
 echo ""
 echo -e "${CYAN}+  Uploading...${NC}"
-scp -i "$SSH_KEY" -P "$SSH_PORT" "$TEMP_TAR" "$SSH_USER@$SSH_HOST:/tmp/$PLUGIN_NAME-upload.tar.gz" 2>/dev/null && \
-ssh -i "$SSH_KEY" -p "$SSH_PORT" "$SSH_USER@$SSH_HOST" "cd '$REMOTE_PLUGINS_DIR' && tar -xzf /tmp/$PLUGIN_NAME-upload.tar.gz && rm /tmp/$PLUGIN_NAME-upload.tar.gz" 2>/dev/null
+scp -i "$SSH_KEY" -P "$SSH_PORT" "$TEMP_TAR" "$SSH_USER@$SSH_HOST:/tmp/$FOLDER_NAME-upload.tar.gz" 2>/dev/null && \
+ssh -i "$SSH_KEY" -p "$SSH_PORT" "$SSH_USER@$SSH_HOST" "cd '$REMOTE_TARGET_DIR' && tar -xzf /tmp/$FOLDER_NAME-upload.tar.gz && rm /tmp/$FOLDER_NAME-upload.tar.gz" 2>/dev/null
 
 if [[ $? -ne 0 ]]; then
     echo -e "${RED}❌ Upload and extract failed${NC}"
@@ -199,18 +214,25 @@ if [[ $? -ne 0 ]]; then
     exit 1
 fi
 
-# Reactivate plugin if WP-CLI available
+# Reactivate based on type if WP-CLI available
 echo ""
 if [[ "$SKIP_WP_CLI" != true && "$USE_WP_CLI" == true ]]; then
-    echo -e "${PINK}+  Reactivating plugin...${NC}"
-    ssh -i "$SSH_KEY" -p "$SSH_PORT" "$SSH_USER@$SSH_HOST" "export LC_ALL=C LANG=C LANGUAGE=C TERM=xterm; cd '$WP_PATH' && wp plugin activate '$PLUGIN_NAME' --allow-root" >/dev/null 2>&1
-fi
-if [[ "$SKIP_WP_CLI" != true && "$USE_WP_CLI" == true ]]; then
-    echo -e "${GREEN}+  Plugin reactivated automatically${NC}"
+    if [[ "$TYPE" == "theme" ]]; then
+        echo -e "${PINK}+  Theme deployment complete${NC}"
+        echo -e "${YELLOW}+  Theme: ${WHITE}Ready for activation in WP Admin → Appearance → Themes${NC}"
+    else
+        echo -e "${PINK}+  Reactivating plugin...${NC}"
+        ssh -i "$SSH_KEY" -p "$SSH_PORT" "$SSH_USER@$SSH_HOST" "export LC_ALL=C LANG=C LANGUAGE=C TERM=xterm; cd '$WP_PATH' && wp plugin activate '$FOLDER_NAME' --allow-root" >/dev/null 2>&1
+        echo -e "${GREEN}+  Plugin reactivated automatically${NC}"
+    fi
 elif [[ "$SKIP_WP_CLI" == true ]]; then
-    echo -e "${YELLOW}+  Plugin: ${WHITE}WP-CLI operations skipped${NC}"
+    echo -e "${YELLOW}+  ${TYPE^}: ${WHITE}WP-CLI operations skipped${NC}"
 else
-    echo -e "${YELLOW}+  Plugin: ${WHITE}Manual activation required${NC}"
+    if [[ "$TYPE" == "theme" ]]; then
+        echo -e "${YELLOW}+  Theme: ${WHITE}Ready for activation in WP Admin${NC}"
+    else
+        echo -e "${YELLOW}+  Plugin: ${WHITE}Manual activation required${NC}"
+    fi
 fi
 
 # Wait for local backup to complete
@@ -219,10 +241,14 @@ wait $TARGZ_PID
 # Cleanup
 rm -f "$TEMP_TAR"
 
-# Verify the deployment
+# Verify the deployment based on type
 echo ""
 echo -e "${PURPLE}+  Verifying deployment...${NC}"
-VERIFY_FILE=$(ssh -i "$SSH_KEY" -p "$SSH_PORT" "$SSH_USER@$SSH_HOST" "[ -f '$REMOTE_PLUGINS_DIR/$PLUGIN_NAME/$PLUGIN_NAME.php' ] && echo 'found' || echo 'not_found'" 2>/dev/null)
+if [[ "$TYPE" == "theme" ]]; then
+    VERIFY_FILE=$(ssh -i "$SSH_KEY" -p "$SSH_PORT" "$SSH_USER@$SSH_HOST" "[ -f '$REMOTE_TARGET_DIR/$FOLDER_NAME/style.css' ] && echo 'found' || echo 'not_found'" 2>/dev/null)
+else
+    VERIFY_FILE=$(ssh -i "$SSH_KEY" -p "$SSH_PORT" "$SSH_USER@$SSH_HOST" "[ -f '$REMOTE_TARGET_DIR/$FOLDER_NAME/$FOLDER_NAME.php' ] && echo 'found' || echo 'not_found'" 2>/dev/null)
+fi
 
 if [[ "$VERIFY_FILE" != "found" ]]; then
     echo -e "${RED}ERROR: Deployment verification failed${NC}"
@@ -231,11 +257,11 @@ fi
 
 # Optional slow file count verification
 if [[ "$SKIP_FILE_COUNT_VERIFICATION" != true ]]; then
-    VERIFY=$(ssh -i "$SSH_KEY" -p "$SSH_PORT" "$SSH_USER@$SSH_HOST" "find '$REMOTE_PLUGINS_DIR/$PLUGIN_NAME' -type f | wc -l" 2>/dev/null)
-    LOCAL_COUNT=$(find "$LOCAL_PLUGIN_DIR" -type f | wc -l)
+    VERIFY=$(ssh -i "$SSH_KEY" -p "$SSH_PORT" "$SSH_USER@$SSH_HOST" "find '$REMOTE_TARGET_DIR/$FOLDER_NAME' -type f | wc -l" 2>/dev/null)
+    LOCAL_COUNT=$(find "$LOCAL_TARGET_DIR" -type f | wc -l)
     FILE_COUNT_INFO="${WHITE}$VERIFY/$LOCAL_COUNT${NC}"
 else
-    LOCAL_COUNT=$(find "$LOCAL_PLUGIN_DIR" -type f | wc -l)
+    LOCAL_COUNT=$(find "$LOCAL_TARGET_DIR" -type f | wc -l)
     FILE_COUNT_INFO="${WHITE}$LOCAL_COUNT${NC} ${GREY}files (remote count skipped)${NC}"
 fi
 
@@ -244,8 +270,8 @@ echo -e "${GREEN}---------------------------------------------------${NC}"
 echo -e "${GREEN}+  Deployment successful!${NC}"
 echo -e "${GREEN}---------------------------------------------------${NC}"
 echo ""
-echo -e "${CYAN}+  Previous Plugin Version:${NC} ${WHITE}$REMOTE_VERSION${NC}"
-echo -e "${CYAN}+  New Plugin Version:${NC} ${WHITE}$PLUGIN_VERSION${NC}"
+echo -e "${CYAN}+  Previous ${TYPE^} Version:${NC} ${WHITE}$REMOTE_VERSION${NC}"
+echo -e "${CYAN}+  New ${TYPE^} Version:${NC} ${WHITE}$VERSION_NUMBER${NC}"
 echo -e "${PURPLE}+  Files:${NC} $FILE_COUNT_INFO"
 echo ""
 echo -e "${GOLD}+  Local Backup:${NC}"
@@ -255,14 +281,14 @@ if [[ "$WP_CLI_CHECK" == *"backed_up_and_renamed"* ]]; then
     echo ""
     echo -e "${GOLD}+  Remote Backups:${NC}"
     if [[ "$SKIP_REMOTE_TAR_BACKUP" != true ]]; then
-        echo -e "${GREY}   +  tar.gz: $REMOTE_BACKUP_DIR/$PLUGIN_NAME.$REMOTE_VERSION-$TIMESTAMP.tar.gz${NC}"
+        echo -e "${GREY}   +  tar.gz: $REMOTE_BACKUP_DIR/$FOLDER_NAME.$REMOTE_VERSION-$TIMESTAMP.tar.gz${NC}"
     fi
     if [[ "$SKIP_REMOTE_FOLDER_RENAME" != true ]]; then
         # Show the actual folder name that was created
         if [[ "$WP_CLI_CHECK" == *"with_timestamp"* ]]; then
-            echo -e "${GREY}   +  Remote folder renamed to: $REMOTE_PLUGINS_DIR/$PLUGIN_NAME.$REMOTE_VERSION-$TIMESTAMP${NC}"
+            echo -e "${GREY}   +  Remote folder renamed to: $REMOTE_TARGET_DIR/$FOLDER_NAME.$REMOTE_VERSION-$TIMESTAMP${NC}"
         elif [[ "$WP_CLI_CHECK" == *"no_timestamp"* ]]; then
-            echo -e "${GREY}   +  Remote folder renamed to: $REMOTE_PLUGINS_DIR/$PLUGIN_NAME.$REMOTE_VERSION${NC}"
+            echo -e "${GREY}   +  Remote folder renamed to: $REMOTE_TARGET_DIR/$FOLDER_NAME.$REMOTE_VERSION${NC}"
         fi
     fi
     if [[ "$SKIP_REMOTE_TAR_BACKUP" == true && "$SKIP_REMOTE_FOLDER_RENAME" == true ]]; then
