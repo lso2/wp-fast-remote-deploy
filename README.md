@@ -784,3 +784,26 @@ MIT License - feel free to use and modify for your projects.
 - WP-CLI integration for plugin management
 - Color-coded console output
 - Windows WSL integration
+
+---
+
+## 💖 Support This Project
+
+If this tool has saved you time and made your WordPress development workflow smoother, consider supporting its continued development!
+
+**Buy me a coffee!**
+
+[![Ko-fi](https://img.shields.io/badge/Ko--fi-F16061?style=for-the-badge&logo=ko-fi&logoColor=white)](https://ko-fi.com/techreader)
+[![PayPal](https://img.shields.io/badge/PayPal-00457C?style=for-the-badge&logo=paypal&logoColor=white)](https://www.paypal.com/ncp/payment/8VLYCGR6SM6A4)
+
+**Why donate?**
+- ☕ Fuel more late-night coding sessions
+- 🚀 Support new features and improvements  
+- 🐛 Faster bug fixes and updates
+- 📚 Better documentation and tutorials
+
+**Even small contributions make a big difference!** Every coffee helps keep this project actively maintained and growing.
+
+---
+
+*Made with ❤️ for the WordPress developer community*
