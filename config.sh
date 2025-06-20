@@ -6,7 +6,7 @@
 # License: MIT
 
 # Script Configuration
-VERSION="2.0.1"              	# Script version
+VERSION="2.1.2"  # Script version
 
 # ============================================================================
 # REQUIRED: CONFIG - Quickly switch between plugins/themes & Set Type
@@ -68,6 +68,11 @@ SKIP_REMOTE_FOLDER_RENAME=false      # Skip renaming remote folder backup
 COMPRESSION_LEVEL=1                  # 1=fastest, 9=best compression (default: 1 for speed)
 COMPRESSION_TOOL="pigz"              # pigz (parallel/faster) or gzip (standard)
 
+# Backup file (folder-name.php or style.css) before incrementing version with update-version.bat
+VERSION_BACKUP="false"
+
+# Auto-close the window after running the update-version.bat script
+VERSION_AUTO_CLOSE="false"
 
 # ----------------------------------------------------------------------------
 # OPTIONAL: CUSTOM PATHS - you can leave as-is if you use default settings
@@ -90,14 +95,14 @@ THEMES_FOLDER="themes"  	 	# Change if you renamed themes folder
 
 # First define TYPE-dependent variables
 if [[ "$TYPE" == "theme" ]]; then
-    LOCAL_BACKUP_FOLDER="${PREFIX}${THEMES_FOLDER}_${LOCAL_BAK_SUFFIX}"   # e.g. .themes_backups
-    REMOTE_TARGET_FOLDER="${WPCONTENT_FOLDER}/${THEMES_FOLDER}"           # e.g. wp-content/themes
-    MAIN_FILE_SUFFIX="/style.css"  									      # Themes use style.css for version
+    LOCAL_BACKUP_FOLDER="${PREFIX}${TYPE}_${LOCAL_BAK_SUFFIX}"   	# e.g. .themes_backups
+    REMOTE_TARGET_FOLDER="${WPCONTENT_FOLDER}/${THEMES_FOLDER}"     # e.g. wp-content/themes
+    MAIN_FILE_SUFFIX="/style.css"  									# Themes use style.css for version
     TYPE_PLURAL="themes"
 else
-    LOCAL_BACKUP_FOLDER="${PREFIX}${PLUGINS_FOLDER}_${LOCAL_BAK_SUFFIX}"  # e.g. .plugins_backups
-    REMOTE_TARGET_FOLDER="${WPCONTENT_FOLDER}/${PLUGINS_FOLDER}"          # e.g. wp-content/plugins
-    MAIN_FILE_SUFFIX="/${FOLDER_NAME}.php"  				              # Plugins use main plugin file
+    LOCAL_BACKUP_FOLDER="${PREFIX}${TYPE}_${LOCAL_BAK_SUFFIX}"  	# e.g. .plugins_backups
+    REMOTE_TARGET_FOLDER="${WPCONTENT_FOLDER}/${PLUGINS_FOLDER}"    # e.g. wp-content/plugins
+    MAIN_FILE_SUFFIX="/${FOLDER_NAME}.php"  				        # Plugins use main plugin file
     TYPE_PLURAL="plugins"
 fi
 

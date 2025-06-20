@@ -44,6 +44,35 @@ This automates several things to save time:
 - Add the right-click menu by double-clicking `/_scripts/_right-click-menu/install-folder-name-changer-menu-item.bat` for quick switching of plugin/theme folders
 - Switch between theme/plugin mode either by editing config or double-clicking on `/scripts/switch-to-plugin-type.bat`
 
+## Version Management
+
+### Automatic Version Incrementer
+
+The script includes `update-version.bat` for automatic version number incrementing.
+
+- **Silent operation** - Double-click to increment version numbers automatically
+- **Smart targeting** - For plugins: updates `folder-name/folder-name.php`; For themes: updates `style.css`  
+- **Configurable backups** - Set `VERSION_BACKUP="true"` in config.sh to create .backup files
+- **Visual feedback** - Shows old and new version numbers when updating
+- **Auto-close control** - Configure whether window closes automatically after update
+
+**Usage:** Double-click `update-version.bat` - increments patch version (4.3.4 → 4.3.5)
+
+**Config settings:**
+```bash
+VERSION_BACKUP="true"        # Create backup files before version increment
+VERSION_AUTO_CLOSE="false"   # Keep window open to see version changes
+```
+
+**Output example:**
+```
+Plugin header version: 4.3.4 -> 4.3.5
+Plugin define version: 4.3.4 -> 4.3.5
+
+Version update completed.
+Press any key to continue...
+```
+
 ## New in Version 2.0.1 - Enhanced Configuration & Organization
 
 🔧 **Configuration Improvements**: Enhanced config file organization and path handling
@@ -610,6 +639,29 @@ MIT License - feel free to use and modify for your projects.
 **⭐ If this script saved you time, please star the repository!**
 
 ## Changelog
+
+### v2.1.2 - Enhanced User Experience & Theme Support
+- **👀 Visual Version Feedback** - Now displays old and new version numbers during update process
+- **⏸️ Auto-Close Control** - New `VERSION_AUTO_CLOSE="false"` setting to keep window open for review
+- **🎨 Fixed Theme Version Detection** - Properly handles CSS theme version formats without quotes
+- **🧹 Cleaned File Output** - Resolved unwanted file creation during version updates
+- **📊 Improved User Feedback** - Clear output showing which versions were updated and their changes
+
+### v2.1.1 - Core Functionality Fixes  
+- **🔧 Fixed Config Parsing** - Resolved FOLDER_NAME extraction issues with inline comments
+- **⚡ Improved PowerShell Integration** - More reliable find/replace operations for version numbers
+- **🎯 Enhanced Plugin Support** - Fixed both plugin header and define statement version updates
+- **🛠️ Stabilized File Processing** - Resolved file reading and replacement consistency issues
+- **🐛 Bug Fixes** - Multiple stability improvements for reliable version incrementing
+
+### v2.1.0 - Automatic Version Management
+- **📈 Added Version Incrementer** - New `update-version.bat` for automatic version number bumping
+- **🎯 Smart File Targeting** - Automatically updates correct file based on TYPE and FOLDER_NAME from config.sh
+- **🔇 Silent Operation** - Double-click to increment version with minimal user interaction
+- **💾 Configurable Backups** - New `VERSION_BACKUP="true"` setting to control .backup file creation
+- **🔢 Patch Version Increment** - Automatically bumps patch version (4.3.4 → 4.3.5)
+- **🔄 Plugin/Theme Support** - Works with both plugins (.php) and themes (style.css) seamlessly
+- **📝 Version Pattern Detection** - Finds and updates WordPress standard version formats automatically
 
 ### v2.0.1 - Enhanced Configuration & Organization
 - **📁 Directory Reorganization** - Moved `_type-switcher` and `_right-click-menu` to root directory with `_` prefix
