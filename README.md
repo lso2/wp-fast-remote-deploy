@@ -1,31 +1,34 @@
-# Fast WordPress Plugin Deployment Script
-
-These show current TYPE setting and switch it automatically.# Fast WordPress Plugin/Theme Deployment Script
+# Fast WordPress Plugin/Theme Deployment Script
 
 A time-saving one-click deployment script for local WordPress plugin AND theme development, eliminates manual file copying and activation; uses wp-cli for automatic plugin reactivation with automatic local and remote backups, fallbacks, and easy setup using a unified config file.
 
 ![Windows](https://img.shields.io/badge/Windows-10%2B-blue.svg)
 ![WordPress](https://img.shields.io/badge/WordPress-5.0%2B-21759B.svg)
-![Version](https://img.shields.io/badge/Version-2.0.1-green.svg)
+![Version](https://img.shields.io/badge/Version-3.3.4-green.svg)
 ![License](https://img.shields.io/badge/License-GPLv3-orange.svg)
 
 > **Created by:** [lso2](https://github.com/lso2)  
 > **Repository:** [wp-fast-remote-deploy](https://github.com/lso2/wp-fast-remote-deploy)
 
-
 ## Summary
 
 This automates several things to save time:
 - **Unified Plugin/Theme Support** - Works with both WordPress plugins and themes using a single config
-- **Quick Type Switching** - Batch files to instantly switch between plugin and theme modes
-- **Right-Click Integration** - Context menu to instantly update folder names
+- **Auto-Detection System** - Automatically detects plugin vs theme based on WordPress standards
+- **Right-Click Integration** - Context menu to instantly switch projects with intelligent type detection
+- **Smart Rollback System** - Safely rollback both local and remote files with automatic safety backups
 - Backs up the local folder to a .tar.gz
 - Backs up the remote folder to a .tar.gz
 - Renames remote folder by appending the version number for quick reverting during testing
 - Copies the folder quickly from local to remote to the WP directory using a temporary .tar.gz and unpacking remotely
 - For plugins: Deactivates and reactivates the plugin using WP-CLI to help re-initialize it
 - For themes: Deploys and notifies for manual activation (themes can't be auto-activated safely)
+- **Database Backup System** - Automated database backups with manual and auto modes
 - Gives a summary of what was done
+
+## 📸 Fast Deploy Script Screenshot
+
+![Screenshot of CMD window on completion](_scripts/screen/screen.jpg)
 
 ## Quick Usage Guide
 
@@ -33,7 +36,7 @@ This automates several things to save time:
 - Download the repo and drop it directly into your root, so that the .bat file and config file are in the same folder as your plugin folder.
 - Configure the config.sh file by adding your real paths and server details.
 - In the config file:
-	- **Set TYPE** to "plugin" or "theme" depending on what you're deploying
+	- **Auto-detection handles TYPE** - Right-click menu now automatically detects plugin vs theme
 	- Include the folder name like your-plugin-folder-name or your-theme-folder-name in FOLDER_NAME
 	- Update the local and remote backup paths
 	- Set up your ssh connection
@@ -41,8 +44,8 @@ This automates several things to save time:
 - Run the script by double-clicking the .bat file. It will open a CMD window which will show you the progress and details.
 
 #### Bonus:
-- Add the right-click menu by double-clicking `/_scripts/_right-click-menu/install-folder-name-changer-menu-item.bat` for quick switching of plugin/theme folders
-- Switch between theme/plugin mode either by editing config or double-clicking on `/scripts/switch-to-plugin-type.bat`
+- Add the auto-detecting right-click menu by double-clicking `/_scripts/_right-click-menu/install-auto-detect-folder-switcher.bat` for instant switching with intelligent type detection
+- Manual type switchers still available: `/_scripts/_advanced/type switcher/switch-to-plugin-type.bat` and `/_scripts/_advanced/type switcher/switch-to-theme-type.bat` - move to the root of the `_scripts` folder before using so it works.
 
 ## Version Management
 
@@ -73,32 +76,152 @@ Version update completed.
 Press any key to continue...
 ```
 
-## New in Version 2.0.1 - Enhanced Configuration & Organization
+## Smart Rollback System
 
-🔧 **Configuration Improvements**: Enhanced config file organization and path handling
+### Comprehensive Local + Remote Rollback
+- **🔄 Synchronized Rollback** - Rolls back both local and remote files to keep them in sync
+- **🛡️ Safety Backups** - Creates safety backups of current versions before rollback
+- **🎯 Version Detection** - Separately detects local and remote versions (handles mismatched scenarios)
+- **📋 Visual Backup Selection** - Browse available backups with version numbers, dates, and file sizes
+- **⚙️ Configurable Behavior** - Choose between full sync or remote-only rollback
+
+### Rollback Modes
+
+**Full Sync Mode (Default - `ROLLBACK_SYNC_LOCAL="true"`):**
+1. Creates local safety backup: `my-plugin.1.9-safety-local-123456.tar.gz`
+2. Creates remote safety backup: `my-plugin.2.0-safety-remote-123456.tar.gz`  
+3. Rolls back both local and remote to selected version
+4. Ensures perfect synchronization between environments
+
+**Remote-Only Mode (`ROLLBACK_SYNC_LOCAL="false"`):**
+1. Only rolls back remote server
+2. Shows warning about local/remote version mismatch
+3. Perfect for testing scenarios where you want to keep local changes
+
+### Usage
+```bash
+# List available backups
+_scripts/rollback.bat
+
+# The script will show:
+Available backup versions for my-plugin (plugins):
+========================================
+|  #  | Version      | Date Created        | Size     | Filename
+| --- | ------------ | ------------------- | -------- | ------------------
+|  1  | 1.2.3        | Jun 20 2025 14:30   | 2.1 MB   | my-plugin.1.2.3-143022.tar.gz
+|  2  | 1.2.2        | Jun 19 2025 09:15   | 2.0 MB   | my-plugin.1.2.2-091502.tar.gz
+
+Enter version number to rollback to: 1    # Select by number or version
+```
+
+## Auto-Detection System
+
+**🔍 Intelligent Type Detection**
+The right-click menu now automatically detects whether you're working on a plugin or theme using WordPress standards:
+
+- **Theme Detection**: Looks for `Theme Name:` header in `style.css` (WordPress requirement)
+- **Plugin Detection**: Default when no `Theme Name:` found (foolproof fallback)
+
+**Benefits:**
+- **No Manual Switching** - Right-click any folder and it auto-configures correctly  
+- **Edge Case Proof** - Handles plugins that have `style.css` files correctly
+- **Zero Configuration** - No more manually setting TYPE in config
+- **Accurate** - Based on WordPress requirements, not file existence
+
+## Database Backup System (Alpha - In Testing)
+
+### Automated Database Backups
+- **🔧 Three Operation Modes** - Off, manual tools only, or automatic with deployment
+- **📊 Smart Credential Detection** - Reads from wp-config.php automatically or uses manual overrides
+- **🛡️ Connection-Only Users** - Works with backup users that have dump privileges but no login access
+- **💾 Multiple Storage Options** - Custom backup locations or WordPress directory storage
+
+### Database Modes
+
+**Off Mode (`DB_BACKUP_MODE="off"`):**
+- No database operations
+- Pure deployment focus
+
+**Manual Mode (`DB_BACKUP_MODE="manual"`):**
+- Provides `_scripts/db-backup.bat` for on-demand backups
+- `_scripts/db-restore.bat` for restoring from backups
+- No automatic backup during deployment
+
+**Auto Mode (`DB_BACKUP_MODE="auto"`):**
+- Automatically creates database backup before each deployment
+- Provides all manual tools plus integration
+
+### Configuration
+```bash
+# Database backup modes
+DB_BACKUP_MODE="manual"          # "off", "manual", or "auto"
+
+# Expert manual override (optional)
+DB_OVERRIDE_ENABLED="false"      # Use manual database settings instead of wp-config.php
+DB_NAME="your_database"          # Manual database name
+DB_USER="your_db_user"          # Manual database user  
+DB_PASS="your_db_password"      # Manual database password
+DB_HOST="your_db_host"          # Manual database host (default: localhost)
+DB_PORT="your_db_port"          # Manual database port (default: 3306)
+
+# Custom backup location (optional)
+DB_PATH_ENABLED="false"         # Enable custom backup directory
+DB_PATH="/custom/backup/path"   # Custom backup location
+```
+
+## New in Version 3.3.4 - Auto-Detection Revolution & Enhanced Reliability
+- **🔍 Foolproof Auto-Detection** - Right-click menu now uses WordPress `Theme Name:` header for 100% accurate theme detection
+- **🛡️ Smart Rollback System** - Synchronized local+remote rollback with separate safety backups and version detection
+- **💾 Robust Database Backup** - PHP-based database backup system that works with restricted backup users
+- **⚡ Streamlined Workflow** - Auto-detection eliminates need for manual type switching in 99% of cases
+- **🔧 Enhanced Configuration** - Improved rollback behavior controls and database override options
+
+## 📸 Screenshots
+
+![Screenshot of rollback window completion](_scripts/screen/rollback.jpg)
+
+### Simplified Basic Setup For Beginners & Hobbyists
+
+- **Reduced Setup Config**: Almost nothing left to manually configure - just your ssh, which has a script that will automate this for you (`detect-server-config.sh`), and the path to your wordpress directory. Nothing else to get started using it! 
+- **Auto-Detection Integration**: Right-click any plugin/theme folder and it automatically detects the type and configures everything
+- **Intelligent Path Detection**: Right-click menu now automatically detects and configures paths
+- **Smart Rollback System**: Visually browse backups and rollback both local and remote with safety backups
 
 ### Key Improvements:
-- **Reorganized Config File** - Clear sections: Required Config, One-Time Setup, Optional Settings
-- **Drive Letter Variable** - Configurable drive letter instead of hardcoded "C"
-- **Customizable WordPress Folders** - Support for renamed wp-content, plugins, themes folders
-- **Flexible Backup Naming** - Configurable prefix and suffix for backup folders
-- **Improved Path Logic** - Cleaner LOCAL_PATH handling without hardcoded paths
-- **Updated Tools** - Type switcher and right-click menu moved to root with updated paths
-- **Generic Script Name** - deploy-plugin-wsl.sh can be renamed to deploy-wsl.sh (works for both types)
-
-## 📸 Screenshot
-
-![Screenshot of CMD window on completion](_scripts/screen/screen.jpg)
+- **Smart Path Auto-Detection** - Right-click menu automatically detects DRIVE_LETTER and LOCAL_PATH from folder location
+- **Zero Configuration Setup** - No more manual path editing when switching between different drives or project structures
+- **Foolproof Type Detection** - Uses WordPress `Theme Name:` header requirement for 100% accurate detection
+- **Enhanced Rollback System** - Synchronized local+remote rollback with comprehensive safety backup system
+- **Line Ending Issue Resolution** - Added comprehensive troubleshooting and fixes for `$'\r': command not found` errors
+- **Enhanced Debug Tools** - Updated debug utilities with sed command alternatives and better instructions
+- **Silent PowerShell Execution** - Suppressed PowerShell execution policy warnings in right-click menu
+- **Improved Documentation** - Enhanced README with auto-detection details and rollback system documentation
 
 ## 🚀 Features
 
 - ⚡ **Fast Deployment** - SSH multiplexing and parallel operations
 - 🔄 **Automatic Plugin Management** - Deactivates/reactivates plugins via WP-CLI
-- 💾 **Dual Backup System** - Creates both folder and tar.gz backups locally
-- 🗂️ **Version-based Organization** - Automatically extracts version numbers and organizes backups
+- 💾 **Dual Backup System** - Creates both folder and tar.gz backups locally and remotely
+- 🗂️ **Version-based Organization** - Automatically extracts version numbers and organizes backups, no overwrites
 - 🌐 **Remote Backup Management** - Renames existing remote plugins with version timestamps
 - 🎨 **Beautiful Console Output** - Color-coded progress with clean formatting
-- 🔧 **WSL Integration** - Windows batch script that calls WSL bash script
+- 🔍 **Auto-Detection System** - Automatically detects plugin vs theme using WordPress standards
+- 🛡️ **Smart Rollback System** - Synchronized local+remote rollback with safety backups
+- 💾 **Database Backup Integration** - Automated database backups with multiple operation modes
+- 🗂️ **Git/Github Integration** (Beta) - Automatically backup to Git/Github (in testing)
+- 💾 **Multi-Server Support** (Beta): Set up multiple servers to deploy simultaneously (in testing)
+
+### One-Click Automation Scripts
+
+- ⚡ **One-Click Deployment Script**: Deploy and backup your plugin/theme both locally and remotely with one click fast with WP-CLI support
+- ⚡ **One-Click Smart Rollback**: Synchronized local+remote rollback with visual backup selection and safety backups
+- 🌐 **Auto-Detecting Right-Click Integration**: One-click script to add right-click menu with intelligent plugin/theme detection
+- ⚡ **One-Click Version Upgrader**: One-click integration so you can increment the version of your theme/plugin quickly automatically
+- 💾 **One-Click Database Backup**: Manual or automatic database backup with multiple operation modes
+- 🗂️ **Auto-detect Server Config**: Drop detect-server-config.sh onto your server and run it to generate your server details automatically
+- 🔧 **WSL Integration** - Windows batch script that calls WSL bash script automatically, with automatic powershell integration
+- ⚡ **Advanced Setup Wizard** (Beta): Quickly get started with advanced features (in testing)
+- ⚡ **One-Click Switch Type**: Switch between plugin or theme with one click, no config required (auto-detection reduces need)
 
 ## Speed Optimizations
 
@@ -112,7 +235,7 @@ Press any key to continue...
 - Windows with WSL (Windows Subsystem for Linux)
 - SSH access to your WordPress server
 - WP-CLI installed on the server (optional but recommended)
-- WordPress plugin with version number in main PHP file
+- WordPress plugin with version number in main PHP file OR theme with version in style.css
 - SSH key authentication configured (see setup guide below)
 - **pigz** for faster compression (optional, auto-falls back to gzip)
 
@@ -301,57 +424,89 @@ ssh-add -l
 ssh-add ~/.ssh/id_rsa
 ```
 
+### Line Ending Issues
+
+**Problem**: Getting `$'\r': command not found` errors
+
+**Cause**: Windows line endings (CRLF) in config.sh causing bash parsing errors
+
+**Quick Fix**:
+```bash
+# Fix line endings in config.sh
+sed -i 's/\r$//' config.sh
+```
+
+**Alternative fixes**:
+```bash
+# Using dos2unix (if available)
+dos2unix config.sh
+
+# Using the debug utilities
+_scripts\_advanced\debug\fix-line-endings.bat
+```
+
+**Prevention**: Always save config.sh with LF line endings, or run the sed command after editing
+
 ## Installation
 
 1. Clone this repository to your plugin development directory
-2. Edit the configuration variables in `deploy-wsl.sh`
+2. Edit the configuration variables in `config.sh`
 3. Set up SSH key authentication to your server
-4. Make the script executable: `chmod +x deploy-wsl.sh`
+4. Make the script executable: `chmod +x .run/deploy-wsl.sh`
 
-## Right-Click Menu Integration
+## Auto-Detecting Right-Click Menu Integration
 
-For even faster workflow, you can install a Windows right-click context menu that automatically updates the `FOLDER_NAME` in your config.sh file based on the folder you right-click on.
+The new auto-detecting right-click menu eliminates manual type switching by intelligently detecting plugin vs theme using WordPress standards.
 
 ### Installation
-1. **Run as Administrator**: Right-click `_right-click-menu/install-folder-name-changer-menu-item.bat` and select "Run as administrator"
+1. **Run as Administrator**: Right-click `_scripts\_right-click-menu\install-auto-detect-folder-switcher.bat` and select "Run as administrator"
 2. **Confirm installation**: You should see "Installation complete!" message
+
+### Auto-Detection Logic
+- **Theme Detection**: Searches for `Theme Name:` header in `style.css` (WordPress requirement)
+- **Plugin Detection**: Default when no `Theme Name:` header found
+- **100% Accurate**: Based on WordPress standards, handles edge cases correctly
 
 ### Usage
 1. **Right-click any plugin/theme folder** in your development directory
-2. **Select "Change Folder Name"** from the context menu
-3. **Automatic update**: The script will find your `config.sh` file and update `FOLDER_NAME="..."` to match the folder name you clicked
+2. **Select "Switch to This Folder (Auto-Detect)"** from the context menu
+3. **Automatic detection and update**: The script will:
+   - Detect if it's a plugin or theme using WordPress standards
+   - Update `FOLDER_NAME="..."` to match the folder name
+   - Update `TYPE="plugin"` or `TYPE="theme"` automatically
+   - Update `DRIVE_LETTER="..."` and `LOCAL_PATH="..."` automatically
+   - Rename deploy file to include folder name and detected type
 
 ### Example Workflow
 ```
 Your Directory Structure:
 ├── my-awesome-plugin/     ← Right-click this folder
-├── another-theme/
-├── config.sh              ← FOLDER_NAME gets updated automatically
+├── my-cool-theme/         ← Or this folder
+├── config.sh              ← Gets updated automatically  
 └── deploy.bat
 ```
 
-When you right-click on `my-awesome-plugin` and select "Change Folder Name", your config.sh will be updated to:
+**For Plugin (no Theme Name in style.css):**
 ```bash
 FOLDER_NAME="my-awesome-plugin"
+TYPE="plugin"                       # Auto-detected
+DRIVE_LETTER="C"                    # Auto-detected
+LOCAL_PATH="dev-projects"           # Auto-detected
+# Deploy file renamed to: DEPLOY__my-awesome-plugin__plugin.bat
 ```
 
-### Quick Plugin/Theme Switch Right-Click Integration
-
-```cmd
-# Install the right-click menu for quick folder switch
-_scripts\_right-click-menu\install-folder-name-changer-menu-item.bat
-
-# Uninstall the right-click menu
-_scripts\_right-click-menu\install-folder-name-changer-menu-item.bat
+**For Theme (has Theme Name: in style.css):**
+```bash
+FOLDER_NAME="my-cool-theme"
+TYPE="theme"                        # Auto-detected
+DRIVE_LETTER="C"                    # Auto-detected
+LOCAL_PATH="dev-projects"           # Auto-detected  
+# Deploy file renamed to: DEPLOY__my-cool-theme__theme.bat
 ```
 
-Right-click any folder in the same directory as the deploy and it will rename the deploy to:
-
-```cmd
-DEPLOY__folder-name__type.bat
-```
-
-Where "folder-name" is the name of the plugin or theme folder, and type is either "plugin" or "theme", so you can easily see what you are deploying.
+### Success Messages
+- `TYPE: theme (found 'Theme Name:' in style.css)`
+- `TYPE: plugin (no 'Theme Name:' found - default to plugin)`
 
 ## 📸 Screenshots
 
@@ -359,10 +514,9 @@ Where "folder-name" is the name of the plugin or theme folder, and type is eithe
 
 ![Screenshot of CMD window on completion](_scripts/screen/screen-menu-item-confirm.jpg)
 
+### Manual Type Switching (Legacy)
 
-### Quick Type Switching
-
-Use the batch files in `_scripts/` folder:
+Manual type switchers are still available for edge cases:
 
 ```cmd
 # Switch to theme mode
@@ -372,11 +526,13 @@ _scripts\switch-to-theme-type.bat
 _scripts\switch-to-plugin-type.bat
 ```
 
-These switch current TYPE setting automatically to switch between theme and plugin mode.
-
+**When you might need manual switching:**
+- Plugin that has a `style.css` with `Theme Name:` (extremely rare)
+- Overriding auto-detection for testing purposes
+- Auto-detection fails for some reason
 
 ### Uninstallation
-- **Run as Administrator**: Right-click `_right-click-menu/uninstall-folder-name-changer-menu-item.bat` and select "Run as administrator"
+- **Run as Administrator**: Right-click `_scripts\_right-click-menu\uninstall-auto-detect-folder-switcher.bat` and select "Run as administrator"
 
 ### Requirements
 - Windows 10 or later
@@ -388,18 +544,15 @@ These switch current TYPE setting automatically to switch between theme and plug
 Edit the `config.sh` file in the root directory with your settings:
 
 ```bash
-# Type Configuration - CHOOSE YOUR DEPLOYMENT TYPE
-TYPE="plugin"  # Set to "plugin" or "theme"
+# Type Configuration - AUTO-DETECTED BY RIGHT-CLICK MENU
+TYPE="plugin"  # Set to "plugin" or "theme" (auto-detected by right-click menu)
 
 # Folder Configuration
-FOLDER_NAME="your-plugin-name"  # Change this to switch plugins/themes instantly
+FOLDER_NAME="your-plugin-name"  # Auto-updated by right-click menu
 
-# Legacy compatibility (automatically set)
-PLUGIN_NAME="$FOLDER_NAME"  # Backwards compatibility
-
-# Base Paths
-LOCAL_BASE="/mnt/c/path/to/your/plugins"  # For plugins
-# LOCAL_BASE="/mnt/c/path/to/your/themes"   # For themes
+# Base Paths - AUTO-DETECTED BY RIGHT-CLICK MENU
+DRIVE_LETTER="C"               # Auto-detected by right-click menu
+LOCAL_PATH="dev-projects"      # Auto-detected by right-click menu
 
 # SSH Configuration  
 SSH_HOST="your-server-ip"
@@ -407,6 +560,18 @@ SSH_PORT="22"
 SSH_USER="username"
 SSH_KEY="~/.ssh/id_rsa"
 REMOTE_BASE="/path/to/wordpress/root"
+
+# Rollback Configuration
+ROLLBACK_SYNC_LOCAL="true"     # "true" = rollback both local and remote, "false" = remote only
+
+# Database Backup Configuration
+DB_BACKUP_MODE="manual"        # "off" = no backups, "manual" = backup tools only, "auto" = backup with deploy
+
+# Expert Database Override (optional)
+DB_OVERRIDE_ENABLED="false"    # Use manual database settings instead of wp-config.php
+DB_NAME="your_database"        # Manual database name
+DB_USER="your_db_user"         # Manual database user
+DB_PASS="your_db_password"     # Manual database password
 
 # Auto-generated paths (based on TYPE)
 # Plugin mode: uses wp-content/plugins, .plugin_backups, looks for version in FOLDER_NAME.php
@@ -485,18 +650,20 @@ deploy.bat
 
 ### WSL/Linux Direct
 ```bash
-./deploy-wsl.sh
+./.run/deploy-wsl.sh
 ```
 
 ## How It Works
 
-1. **Version Detection** - Automatically extracts version from plugin's main PHP file OR theme's style.css
-2. **Local Backups** - Creates timestamped folder and tar.gz backups
-3. **Remote Preparation** - Connects via SSH, handles deactivation based on type, renames existing installation
-4. **Fast Upload** - Uses tar.gz compression for quick file transfer
-5. **Extraction** - Extracts files directly on server to correct directory (plugins or themes)
-6. **Activation** - For plugins: automatically reactivates via WP-CLI; For themes: deploys ready for manual activation
-7. **Verification** - Confirms deployment success with appropriate file check
+1. **Auto-Detection** - Right-click menu automatically detects plugin vs theme using WordPress `Theme Name:` header
+2. **Version Detection** - Automatically extracts version from plugin's main PHP file OR theme's style.css
+3. **Local Backups** - Creates timestamped folder and tar.gz backups
+4. **Database Backup** - Creates database backup if enabled (manual or auto mode)
+5. **Remote Preparation** - Connects via SSH, handles deactivation based on type, renames existing installation
+6. **Fast Upload** - Uses tar.gz compression for quick file transfer
+7. **Extraction** - Extracts files directly on server to correct directory (plugins or themes)
+8. **Activation** - For plugins: automatically reactivates via WP-CLI; For themes: deploys ready for manual activation
+9. **Verification** - Confirms deployment success with appropriate file check
 
 ## Version Number Detection
 
@@ -532,14 +699,18 @@ Author: WordPress Team
 └── backups_plugin-name/
     ├── plugin-name.1.0.0-143022.tar.gz
     ├── plugin-name.1.0.1-151205.tar.gz
-    └── plugin-name.1.0.2-162845.tar.gz
+    ├── plugin-name.1.0.2-162845.tar.gz
+    ├── plugin-name.1.0.2-safety-local-143022.tar.gz    # Local safety backup
+    └── plugin-name.1.0.2-safety-remote-143022.tar.gz   # Remote safety backup
 
 # Theme backups    
 .theme_backups/
 └── backups_theme-name/
     ├── theme-name.2.1.0-143022.tar.gz
     ├── theme-name.2.1.1-151205.tar.gz
-    └── theme-name.2.1.2-162845.tar.gz
+    ├── theme-name.2.1.2-162845.tar.gz
+    ├── theme-name.2.1.2-safety-local-143022.tar.gz     # Local safety backup
+    └── theme-name.2.1.2-safety-remote-143022.tar.gz    # Remote safety backup
 ```
 
 ### Remote Backups
@@ -556,10 +727,15 @@ wp-content/
 └── .backups/
     ├── backups_plugin-name/
     │   ├── plugin-name.1.0.0-143022.tar.gz
-    │   └── plugin-name.1.0.1-151205.tar.gz
-    └── backups_theme-name/
-        ├── theme-name.2.1.0-143022.tar.gz
-        └── theme-name.2.1.1-151205.tar.gz
+    │   ├── plugin-name.1.0.1-151205.tar.gz
+    │   └── plugin-name.1.0.1-safety-remote-143022.tar.gz  # Remote safety backup
+    ├── backups_theme-name/
+    │   ├── theme-name.2.1.0-143022.tar.gz
+    │   ├── theme-name.2.1.1-151205.tar.gz
+    │   └── theme-name.2.1.1-safety-remote-143022.tar.gz   # Remote safety backup
+    └── databases/
+        ├── my-plugin-manual-20250620-143022.sql           # Manual database backups
+        └── my-theme-auto-20250620-151205.sql               # Auto database backups
 ```
 
 ## Performance
@@ -599,6 +775,17 @@ Speed improvements come from:
 - Verify file is readable and properly formatted
 - For themes, style.css must be in the root of the theme folder
 
+### Auto-Detection Issues
+- **Theme not detected**: Ensure `style.css` contains `Theme Name:` header (WordPress requirement)
+- **Plugin detected as theme**: Check if plugin has `style.css` with `Theme Name:` header (remove if not needed)
+- **Manual override**: Use type switcher bats if auto-detection is incorrect for your use case
+
+### Database Backup Issues
+- **Connection errors**: Check if user has backup/dump privileges (login privilege not required)
+- **mysqldump not found**: Ensure mysqldump is installed on server
+- **Permission denied**: Verify backup directory is writable
+- **Empty backups**: Check database credentials and connection
+
 ## File Structure
 
 ```
@@ -606,13 +793,20 @@ project/
 ├── deploy.bat              # Windows batch script
 ├── config.sh               # Unified configuration file
 ├── .run/
-│   └── deploy-wsl.sh       # Main deployment script (works for both plugins and themes)
-├── _type-switcher/         # Quick TYPE switching
-│   ├── switch-to-theme-type.bat    # Switch to theme mode
-│   └── switch-to-plugin-type.bat   # Switch to plugin mode
-├── _right-click-menu/      # Right-click menu integration
-│   ├── install-folder-name-changer-menu-item.bat    # Install right-click menu
-│   └── uninstall-folder-name-changer-menu-item.bat  # Remove right-click menu
+│   ├── deploy-wsl.sh       # Main deployment script (works for both plugins and themes)
+│   ├── rollback.sh         # Smart rollback script with local+remote sync
+│   └── db-backup.sh        # Database backup script
+├── _scripts/              # Utility scripts
+│   ├── db-backup.bat      # Manual database backup utility
+│   ├── db-restore.bat     # Database restore utility
+│   ├── rollback.bat       # Rollback interface
+│   ├── switch-to-theme-type.bat    # Manual switch to theme mode
+│   ├── switch-to-plugin-type.bat   # Manual switch to plugin mode
+│   └── _right-click-menu/   # Right-click menu integration
+│       ├── install-auto-detect-folder-switcher.bat     # Install auto-detecting right-click menu
+│       ├── uninstall-auto-detect-folder-switcher.bat   # Remove auto-detecting right-click menu
+│       ├── install-folder-name-changer-menu-item.bat   # Install basic right-click menu (legacy)
+│       └── uninstall-folder-name-changer-menu-item.bat # Remove basic right-click menu (legacy)
 └── README.md              # This file
 ```
 
@@ -632,13 +826,97 @@ project/
 
 ## License
 
-MIT License - feel free to use and modify for your projects.
+GPLv3 — freely use, modify, and distribute, with a commitment to keep the source code open and shared.
 
 ---
 
 **⭐ If this script saved you time, please star the repository!**
 
 ## Changelog
+
+### v3.3.4 - Auto-Detection Revolution & Enhanced Reliability
+- **🔍 Foolproof Auto-Detection System** - Right-click menu now uses WordPress `Theme Name:` header for 100% accurate theme detection
+- **🛡️ Smart Rollback System** - Synchronized local+remote rollback with separate safety backups and independent version detection
+- **💾 Robust Database Backup System** - PHP-based database backup that works with restricted backup users and connection-only privileges
+- **⚡ Streamlined Workflow** - Auto-detection eliminates need for manual type switching in 99% of use cases
+- **🔧 Enhanced Rollback Configuration** - New `ROLLBACK_SYNC_LOCAL` setting for choosing full sync vs remote-only rollback behavior
+- **📋 Visual Backup Management** - Rollback script excludes safety backups from main selection list for cleaner interface
+- **🎯 Independent Version Detection** - Rollback system separately detects local and remote versions to handle mismatched scenarios
+- **💡 Improved User Experience** - Auto-detecting right-click menu with clear success messages showing detection logic
+
+### v3.3.3 - Database Integration & Enhanced Tools
+- **💾 Complete Database Backup System** - Three-mode database system (off/manual/auto) with wp-config.php auto-detection
+- **🔧 Database Override System** - Expert manual database settings for staging/development environments  
+- **🛡️ Connection-Only User Support** - Works with backup users that have dump privileges but no login access
+- **📁 Custom Database Backup Paths** - Configurable backup locations with automatic directory creation
+- **⚡ Enhanced Database Tools** - Manual backup and restore utilities with proper error handling
+- **🎯 Smart Credential Detection** - Automatically reads database settings from wp-config.php or uses manual overrides
+- **📊 Database Backup Integration** - Optional automatic database backup during deployment process
+
+### v3.3.2 - Configuration & Path Enhancement  
+- **🔧 Enhanced Configuration Structure** - Reorganized config.sh with clearer sections and better variable organization
+- **📁 Improved Path Logic** - Better handling of drive letters and local path detection
+- **⚡ SSH Connection Optimization** - Improved SSH connection settings and timeout handling
+- **🛠️ Enhanced Error Handling** - Better error messages and troubleshooting information
+- **📚 Documentation Updates** - Improved setup instructions and configuration examples
+
+### v3.3.1 - Rollback System Foundation
+- **🔄 Advanced Rollback System** - Visual backup selection with version numbers, dates, and file sizes
+- **🛡️ Safety Backup System** - Automatic safety backups before rollback operations
+- **📋 Backup List Management** - Clean presentation of available backups with filtering
+- **⚙️ Rollback Infrastructure** - Foundation for local+remote synchronization system
+- **🎯 Version-Based Organization** - Enhanced backup naming and organization structure
+
+### v3.3.0 - Smart Auto-Detection & Unified Architecture
+- **🔍 Intelligent Type Detection** - Auto-detection system using WordPress standards for plugin vs theme identification
+- **🌐 Enhanced Right-Click Integration** - Auto-detecting right-click menu that eliminates manual type switching
+- **🛡️ Comprehensive Rollback System** - Visual backup selection with safety backups and restoration capabilities
+- **💾 Database Backup Foundation** - Infrastructure for database backup and restore operations
+- **⚡ Performance Optimizations** - Enhanced SSH handling and parallel operations
+- **📁 Smart Path Management** - Automatic drive letter and path detection from folder location
+- **🎨 Enhanced User Experience** - Improved console output and user feedback systems
+
+### v3.2.1 - Simplified Config with Auto-Path-Detection & Manual Overrides
+- **Smart Path Auto-Detection v2** - Script now automatically sets path and drive letter and converts to WSL format - no more need to manually add (optional)
+- **Intelligent Path Detection**: Right-click menu now automatically detects and configures paths
+
+### v3.2.0 - Smart Auto-Detection & Line Ending Fixes
+- **🤖 Smart Path Auto-Detection** - Right-click menu now automatically detects DRIVE_LETTER and LOCAL_PATH from folder location
+- **🎯 Intelligent Path Parsing** - Correctly extracts base path excluding plugins/themes directories (e.g., C:\dev-projects\plugins\my-plugin → LOCAL_PATH="dev-projects")
+- **🔧 Line Ending Issue Resolution** - Added comprehensive troubleshooting and fixes for `$'\r': command not found` errors
+- **🛠️ Enhanced Debug Tools** - Updated debug utilities with sed command alternatives and better instructions
+- **🤫 Silent PowerShell Execution** - Suppressed PowerShell execution policy warnings in right-click menu
+- **📚 Improved Documentation** - Enhanced README with line ending troubleshooting and auto-detection examples
+
+### v3.1.1 - Critical Path Fixes
+- **🛠️ Fixed Batch File Path Calculation** - Corrected WSL path issues in database utilities
+- **🔧 Fixed config.sh Syntax Error** - Resolved multi-line comment syntax causing bash errors
+- **📂 Corrected Relative Paths** - Fixed paths to .run directory in utility scripts
+- **✅ Enhanced Path Flow** - Improved directory navigation and WSL path calculation
+- **🎯 Database Utilities Working** - All _scripts/ tools now function correctly
+
+### v3.1.0 - Database System Revolution & Enhanced Organization
+- **🔄 Simplified Database Configuration** - Single `DB_BACKUP_MODE` variable with three clear options
+- **📊 Three Database Modes** - "off" (no backups), "manual" (tools only), "auto" (with deploy)
+- **🎯 Intuitive Database Controls** - Crystal clear naming and behavior
+- **🔧 Enhanced Override System** - Toggle between wp-config.php and custom database easily
+- **🛡️ Line Ending Protection** - Added .gitattributes and fix utilities for CRLF issues
+- **📁 Better Script Organization** - Improved directory structure and utility placement
+- **⚡ Path Fix Implementation** - Resolved WSL path calculation issues in batch files
+- **🎨 Enhanced User Experience** - Clearer configuration options and better documentation
+- **📋 Migration-Friendly** - Seamless upgrade from old two-variable database system
+
+### v3.0.0 - Major Architecture & Feature Overhaul
+- **🎯 Unified Plugin/Theme Support** - Single script handles both plugins and themes seamlessly
+- **🔄 Dynamic Type Switching** - Easy switching between plugin and theme deployment modes
+- **📂 Smart Path Generation** - Automatic path construction based on TYPE setting
+- **🔧 Enhanced Configuration** - Reorganized config.sh with clear sections and better defaults
+- **⚡ Performance Optimizations** - Improved compression, parallel operations, and SSH efficiency
+- **🛠️ Advanced Features** - Git integration, database backups, and multi-server support
+- **📱 Right-Click Integration** - Windows context menu for instant plugin/theme switching
+- **🎨 Enhanced Version Management** - Automatic version detection for both plugins and themes
+- **🔒 Security Improvements** - Better SSH handling and error management
+- **📚 Comprehensive Documentation** - Complete rewrite of documentation and examples
 
 ### v2.1.2 - Enhanced User Experience & Theme Support
 - **👀 Visual Version Feedback** - Now displays old and new version numbers during update process
@@ -675,116 +953,6 @@ MIT License - feel free to use and modify for your projects.
 - **📜 Script Naming** - `deploy-plugin-wsl.sh` can be renamed to generic `deploy-wsl.sh` (works for both types)
 - **🧹 Code Cleanup** - Better variable organization and dependency order in config file
 
-### v1.6.2
-- **Fixed pigz compression issue** - Resolved 0KB tar files when using pigz compression
-- **Corrected pigz filename handling** - Fixed double .gz extension issue (file.tar.gz.gz)
-- **Improved pigz implementation** - Create uncompressed tar first, then compress with pigz separately
-- **Enhanced compression reliability** - Better error handling for pigz vs gzip operations
-- **Fixed remote folder rename logic** - Resolved issue where folder rename was skipped when tar backup was disabled
-
-### v1.6.1
-- **Improved pigz error handling** - Better fallback mechanisms when pigz encounters issues
-- **Enhanced compression debugging** - Added better error reporting for compression operations
-- **Fixed tar command syntax** - Resolved pigz parameter passing issues
-- **Stability improvements** - More robust compression tool detection and usage
-
-### v1.6.0
-- **Added right-click menu integration** - Windows context menu for instant plugin name switching
-- **Automatic config.sh updates** - Right-click any plugin folder to update PLUGIN_NAME automatically
-- **PowerShell-based solution** - Robust file modification with error handling and user feedback
-- **Visual confirmation dialogs** - Success/error messages with detailed debugging information
-- **Easy installation/removal** - Administrator batch scripts for clean context menu management
-- **Screenshots added** - Visual documentation showing context menu and confirmation dialogs
-- **Enhanced workflow** - No more manual config.sh editing when switching between plugins
-
-### v1.5.4
-- **Fixed remote folder rename display** - Now shows exact folder name including timestamp when applicable
-- **Enhanced backup reporting** - Changed label from "folder:" to "Remote folder renamed to:"
-- **Improved folder tracking** - Better detection of whether timestamp was appended to folder name
-- **Cleaner output formatting** - More precise and informative backup summary messages
-
-### v1.5.3
-- **Implemented plugin-specific backup subfolders** - Actually creates and uses `/backups_plugin-name/` directories
-- **Fixed backup directory creation** - Ensures plugin-specific folders are properly created both locally and remotely
-- **Updated backup paths** - All backup operations now use the correct subfolder structure
-- **Verified backup organization** - Confirmed backups are properly separated by plugin name
-
-### v1.5.2
-- **Comprehensive pigz documentation** - Added detailed installation instructions for multiple Linux distributions
-- **Enhanced README** - Improved pigz setup guide with performance comparisons
-- **Better user guidance** - Clear instructions for both WSL and remote server pigz installation
-- **Configuration examples** - Added clear examples of compression tool settings
-
-### v1.5.1
-- **Fixed pigz installation logic** - Removed automatic installation attempts that required sudo prompts
-- **Silent compression handling** - Script now quietly uses available compression without user intervention
-- **Removed fallback messages** - Clean output with no "pigz not available" warnings
-- **Enhanced user experience** - No more interruptions or confusing installation messages
-- **Documentation improvements** - Added comprehensive pigz installation guide for manual setup
-
-### v1.5.0
-- **Plugin-specific backup folders** - Local and remote backups now organized in `/backups_plugin-name/` subfolders
-- **Better backup organization** - Each plugin's backups are cleanly separated from others
-- **Improved backup paths** - Eliminates backup file conflicts between multiple plugins
-- **Enhanced remote folder tracking** - Better display of actual renamed folder paths with timestamps
-- **Fixed backup directory structure** - Consistent organization across local and remote backups
-
-### v1.4.0
-- **Enhanced pigz integration** - Improved parallel compression with better error handling
-- **Automatic compression detection** - Script intelligently selects best available compression method
-- **Performance optimizations** - Further speed improvements in backup and upload operations
-- **Better compression feedback** - Clear indication of compression method being used
-- **Stability improvements** - More robust handling of compression tool availability
-
-### v1.3.0
-- **Added pigz support** - Much faster parallel compression (default) with automatic fallback to gzip
-- **Configurable compression tool** - Choose between pigz (multi-threaded) or gzip (standard)
-- **Significant speed improvement** - pigz can be 2-4x faster than gzip on multi-core systems
-- **Automatic detection** - Falls back to gzip gracefully if pigz is not installed
-- **Both local and remote** - Uses selected compression tool for all tar operations
-
-### v1.2.1
-- **Fixed compression level syntax** - Corrected tar compression level implementation using GZIP environment variable
-- **Resolved tar options error** - Fixed "Options not supported" error when using custom compression levels
-
-### v1.2.0
-- **Added comprehensive performance options** - New config flags for skipping WP-CLI, remote backups, and folder renaming
-- **Configurable compression levels** - Set compression from 1 (fastest) to 9 (best compression)
-- **Better temp file naming** - Upload files now use plugin name (e.g., `tr-donate-upload-123456.tar.gz`)
-- **Smarter output messages** - Shows appropriate messages when operations are skipped
-- **Faster verification** - Optimized file existence check
-- **Ultra-fast mode support** - Can skip all backups for maximum deployment speed
-
-### v1.1.0
-- **Added optional file count verification** - New `SKIP_FILE_COUNT_VERIFICATION` config option (default: true)
-- **Significantly faster deployments** - Skips slow recursive file counting by default
-- **Smart verification** - Still verifies main plugin file exists for deployment confirmation
-- **Configurable verification** - Set to false if you want detailed file count comparison
-- **Performance improvement** - Reduces verification time from 10-15 seconds to <1 second
-
-### v1.0.8
-- **Fixed remote version detection** - Now properly extracts version from remote plugin files
-- **Enhanced backup naming** - Remote backups use actual remote version instead of new local version
-- **Added fallback handling** - Uses "old" as fallback when version detection fails
-- **Improved regex pattern** - Better version number detection with case-insensitive matching
-- **Fixed quote escaping** - Resolved bash syntax errors in SSH commands
-
-### v1.0.1
-- **Fixed backup logic bug** - only creates tar.gz locally, proper folder+tar.gz remotely
-- **Added config.sh file** - centralized configuration, no need to edit script files
-- **Fixed timestamp bug** - no longer adds timestamp when folder doesn't exist remotely
-- **Dynamic script naming** - batch file reads script name from config
-- **Enhanced remote backups** - creates both tar.gz and folder backups on server
-- **Improved documentation** - added usage summary and configuration guide
-
-### v1.0.0
-- Initial release with basic deployment functionality
-- SSH multiplexing for speed optimization
-- Dual backup system (folder + tar.gz)
-- WP-CLI integration for plugin management
-- Color-coded console output
-- Windows WSL integration
-
 ---
 
 ## 💖 Support This Project
@@ -793,7 +961,7 @@ If this tool has saved you time and made your WordPress development workflow smo
 
 **Buy me a coffee!**
 
-[![Ko-fi](https://img.shields.io/badge/Ko--fi-F16061?style=for-the-badge&logo=ko-fi&logoColor=white)](https://ko-fi.com/techreader)
+[![Ko-fi](https://img.shields.io/badge/Ko--fi-F16061?style=for-the-badge&logo=ko-fi&logoColor=white)](https://techreader.com/ko-fi)
 [![PayPal](https://img.shields.io/badge/PayPal-00457C?style=for-the-badge&logo=paypal&logoColor=white)](https://www.paypal.com/ncp/payment/8VLYCGR6SM6A4)
 
 **Why donate?**

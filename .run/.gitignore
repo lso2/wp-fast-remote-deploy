@@ -1,0 +1,50 @@
+# Ignore backup files
+*.backup
+*.bak
+*.tmp
+
+# Ignore development projects folder
+dev-projects/
+
+# Ignore logs
+*.log
+
+# Ignore local config overrides
+config.local.sh
+
+# Ignore IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Ignore OS files
+.DS_Store
+Thumbs.db
+*.tmp
+
+# Ignore temporary files
+*.temp
+temp/
+
+# Ignore any personal scripts or configs
+personal/
+local/
+
+# Ignore compression artifacts
+*.tar.gz
+*.zip
+*.7z
+
+# Ignore SSH keys (if accidentally placed here)
+*.pem
+*.key
+id_rsa*
+
+# Ignore test files created during setup
+test-*
+TEST-*
+
+# Ignore any files that get generated in _scripts
+_scripts/temp/
+_scripts/*.tmp

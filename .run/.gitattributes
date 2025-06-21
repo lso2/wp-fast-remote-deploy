@@ -1,0 +1,18 @@
+# WordPress Fast Deploy - Git Attributes
+# Ensures consistent line endings across Windows/Linux/Mac
+
+# Shell scripts and config files should always use LF (Unix) line endings
+*.sh text eol=lf
+config.sh text eol=lf
+
+# Batch files should use CRLF (Windows) line endings  
+*.bat text eol=crlf
+
+# Markdown and documentation can use native line endings
+*.md text
+*.txt text
+
+# Binary files
+*.jpg binary
+*.png binary
+*.gif binary

@@ -6,33 +6,31 @@
 # License: MIT
 
 # Script Configuration
-VERSION="2.1.2"  # Script version
+VERSION="3.3.4"  # Script version
 
 # ============================================================================
 # REQUIRED: CONFIG - Quickly switch between plugins/themes & Set Type
 # ============================================================================
 
 # Folder name of plugin or theme
-FOLDER_NAME="your-folder-name"  # Change this to switch plugins/themes instantly
+FOLDER_NAME="my-plugin"  # Change this to switch plugins/themes instantly
+# Example: FOLDER_NAME="my-awesome-plugin" or FOLDER_NAME="my-theme"
 
 # Deployment Type
 TYPE="plugin"  					# Set to "plugin" or "theme" - switches deployment mode
 
 
 # ============================================================================
-# ONE-TIME SETUP - Set once and forget
+# 							ONE-TIME SETUP
+#						  set once and forget
 # ============================================================================
 
 # ----------------------------------------------------------------------------
-# SET ONCE: BASE PATHS - Used for all plugins & themes
+# SET ONCE: REMOTE ENVIRONMENT - Your WordPress server details
 # ----------------------------------------------------------------------------
 
-# Local Environment
-DRIVE_LETTER="C"
-LOCAL_PATH="path/to/your/local/root"	# e.g. C:/dev-projects/plugins --> "dev-projects"
-										# Don't include drive letter or leading slash							
 # Remote Environment  
-REMOTE_BASE="/path/to/wordpress/root"
+REMOTE_BASE="/path/to/wordpress/root"	# e.g. /home/mysite/public_html/mysite.com
 
 # ----------------------------------------------------------------------------
 # SET ONCE: SSH CONFIGURATION - Check readme for setup & key instructions
@@ -46,8 +44,24 @@ SSH_KEY="~/.ssh/id_rsa"
 
 
 # ============================================================================
-# OPTIONAL SETTINGS
+#             NEWBIES CAN STOP HERE! THAT'S ALL YOU NEED! :)
 # ============================================================================
+
+
+#						  DO YOU WISH TO CONTINUE?
+
+
+# ============================================================================
+#                            ADVANCED SETTINGS
+#                        for fine-tuning the script
+# ============================================================================
+
+# ----------------------------------------------------------------------------
+# OPTIONAL: DATABASE BACKUP CONFIGURATION - auto-backup your database
+# ----------------------------------------------------------------------------
+
+# Database backups (credentials read automatically from wp-config.php)
+DB_BACKUP_MODE="manual"		# "off" = no backups, "manual" = backup tools only, "auto" = backup with deploy
 
 # ----------------------------------------------------------------------------
 # OPTIONAL: Other Settings
@@ -74,6 +88,41 @@ VERSION_BACKUP="false"
 # Auto-close the window after running the update-version.bat script
 VERSION_AUTO_CLOSE="false"
 
+# Rollback behavior
+ROLLBACK_SYNC_LOCAL="true"   # "true" = rollback both local and remote, "false" = remote only
+
+
+# ============================================================================
+#                              DANGER ZONE!
+# ============================================================================
+
+
+#					 DO YOU REALLY WISH TO CONTINUE?
+
+
+# ============================================================================
+# !                          EXPERT SETTINGS                                 !
+# !        These settings may be confusing. Use only if you know.            !
+# ============================================================================
+
+# ----------------------------------------------------------------------------
+# OPTIONAL: STAGING/DEV DATABASE - uncomment options to use
+# ----------------------------------------------------------------------------
+
+# Database override system - use different database than wp-config.php
+DB_OVERRIDE_ENABLED="false"			# Whether to use the database override below
+
+# Staging database - manually override the database for development
+DB_NAME="db_name" 		# Your database name
+DB_USER="db_user" 		# Your sql username
+DB_PASS="db_pass" 		# Pass for sql username
+DB_HOST="db_host" 		# Advanced: Alternate host for db
+DB_PORT="db_port" 		# Advanced: Custom port, if any
+
+# Advanced database backup settings
+DB_PATH_ENABLED="false" # Set to true if you want custom backup directory
+DB_PATH="/path/to/db/backup/folder" # Enter full path for custom backup location
+
 # ----------------------------------------------------------------------------
 # OPTIONAL: CUSTOM PATHS - you can leave as-is if you use default settings
 # ----------------------------------------------------------------------------
@@ -88,9 +137,47 @@ WPCONTENT_FOLDER="wp-content" 	# Change if you renamed wp-content folder
 PLUGINS_FOLDER="plugins" 	 	# Change if you renamed plugins folder
 THEMES_FOLDER="themes"  	 	# Change if you renamed themes folder
 
+# ----------------------------------------------------------------------------
+# OPTIONAL: LOCAL PATH OVERRIDE - only if auto-detection fails
+# ----------------------------------------------------------------------------
+
+# ADVANCED: Override auto-detected local paths (leave empty for auto-detection)
+LOCAL_PATH_OVERRIDE=""			# e.g. "custom-projects" - overrides auto-detected path
+DRIVE_LETTER_OVERRIDE=""		# e.g. "d" - overrides auto-detected drive letter
+
+# ----------------------------------------------------------------------------
+# OPTIONAL: EXPERT MODE - GIT INTEGRATION (don't bother if you don't know)
+# ----------------------------------------------------------------------------
+
+# Toggle Git
+GIT_ENABLED="false"              	# Set to "true" to enable Git integration
+
+# Basic deployment (current)
+DEPLOYMENT_METHOD="local"  # "local" Default
+						   # "git" for git-based
+
+# Optional Git integration
+DEPLOYMENT_METHOD="git_auto"  # "git_auto" = Auto-commit then deploy local
+							  # "git_pull" = Deploy from repository
+
+GIT_AUTO_COMMIT="false"          	# Auto-commit before deployment
+GIT_REPO_URL=""                  	# https://github.com/username/repo.git
+GIT_TOKEN=""                     	# GitHub Personal Access Token
+GIT_BRANCH="main"                	# Branch to commit/push to
+GIT_USER_NAME="WordPress Deploy" 	# Git commit author name
+GIT_USER_EMAIL="deploy@auto.local"	# Git commit author email
+
 
 # ============================================================================
-# DO NOT CHANGE: AUTO-GENERATED VALUES - Don't edit below this line
+#                              WARNING!
+# ============================================================================
+
+
+#					DO NOT CONTINUE BELOW THIS LINE!
+
+
+# ============================================================================
+#     DO NOT CHANGE: AUTO-GENERATED VALUES - Don't edit below this line
 # ============================================================================
 
 # First define TYPE-dependent variables
@@ -109,19 +196,39 @@ fi
 # Script name
 SCRIPT_NAME="deploy-wsl.sh"  # Name of the deployment script
 
-# Build paths using the defined variables
-DRIVE_LETTER="${DRIVE_LETTER,,}" # converts to lowercase for WSL path
-LOCAL_BASE="/mnt/${DRIVE_LETTER}/${LOCAL_PATH}/${TYPE_PLURAL}"	# e.g. /mnt/c/dev-projects/plugins
+# ----------------------------------------------------------------------------
+# AUTO-DETECTION: LOCAL PATHS
+# ----------------------------------------------------------------------------
+
+# Auto-detect LOCAL_BASE from config.sh location
+CONFIG_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+LOCAL_BASE="$CONFIG_DIR"
+
+# Apply overrides if provided
+if [[ -n "$LOCAL_PATH_OVERRIDE" ]]; then
+    CURRENT_DRIVE=$(echo "$CONFIG_DIR" | cut -c6)
+    LOCAL_BASE="/mnt/${CURRENT_DRIVE}/${LOCAL_PATH_OVERRIDE}"
+fi
+
+if [[ -n "$DRIVE_LETTER_OVERRIDE" ]]; then
+    CURRENT_PATH=$(echo "$LOCAL_BASE" | sed 's|^/mnt/[a-z]/||')
+    LOCAL_BASE="/mnt/${DRIVE_LETTER_OVERRIDE}/${CURRENT_PATH}"
+fi
 
 # Build full paths from base paths
 LOCAL_TARGET_DIR="${LOCAL_BASE}/${FOLDER_NAME}"
-BACKUP_DIR="${LOCAL_BASE}/${LOCAL_BACKUP_FOLDER}/backups_${FOLDER_NAME}"
+LOCAL_BACKUP_DIR="${LOCAL_BASE}/${LOCAL_BACKUP_FOLDER}/backups_${FOLDER_NAME}"
+REMOTE_TARGET_DIR="${REMOTE_BASE}/${REMOTE_TARGET_FOLDER}"
+REMOTE_BACKUP_DIR="${REMOTE_BASE}/${REMOTE_BACKUP_FOLDER}/backups_${FOLDER_NAME}"
+WP_PATH="${REMOTE_BASE}"
+
+
+# Build remote paths
 REMOTE_TARGET_DIR="${REMOTE_BASE}/${REMOTE_TARGET_FOLDER}"
 REMOTE_BACKUP_DIR="${REMOTE_BASE}/${REMOTE_BACKUP_FOLDER}/backups_${FOLDER_NAME}"
 WP_PATH="${REMOTE_BASE}"
 
 # Legacy compatibility - these maintain backward compatibility with existing scripts
-LOCAL_PLUGIN_DIR="${LOCAL_TARGET_DIR}"
 REMOTE_PLUGINS_DIR="${REMOTE_TARGET_DIR}"
 REMOTE_PLUGINS_FOLDER="${REMOTE_TARGET_FOLDER}"
 PLUGIN_NAME="${FOLDER_NAME}"  # Backwards compatibility

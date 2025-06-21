@@ -2,6 +2,8 @@
 REM Quick Theme/Plugin Type Switcher
 REM This script switches the config.sh TYPE variable between plugin and theme
 
+cd /d "%~dp0\.."
+
 echo Current TYPE setting:
 powershell -Command "Select-String -Path 'config.sh' -Pattern '^TYPE=' | ForEach-Object { $_.Line }"
 echo.
