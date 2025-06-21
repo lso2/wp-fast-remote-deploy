@@ -59,7 +59,7 @@ The script includes `update-version.bat` for automatic version number incrementi
 - **Visual feedback** - Shows old and new version numbers when updating
 - **Auto-close control** - Configure whether window closes automatically after update
 
-**Usage:** Double-click `update-version.bat` - increments patch version (4.3.4 → 4.3.5)
+**Usage:** Double-click `update-version.bat` - increments patch version (1.0.3 → 1.0.4)
 
 **Config settings:**
 ```bash
@@ -68,9 +68,9 @@ VERSION_AUTO_CLOSE="false"   # Keep window open to see version changes
 ```
 
 **Output example:**
-```
-Plugin header version: 4.3.4 -> 4.3.5
-Plugin define version: 4.3.4 -> 4.3.5
+```bash
+Plugin header version: 1.0.3 → 1.0.4
+Plugin define version: 1.0.3 → 1.0.4
 
 Version update completed.
 Press any key to continue...
@@ -113,6 +113,10 @@ Available backup versions for my-plugin (plugins):
 
 Enter version number to rollback to: 1    # Select by number or version
 ```
+
+## 📸 Rollback Screenshot
+
+![Screenshot of rollback window completion](_scripts/screens/rollback.jpg)
 
 ## Auto-Detection System
 
@@ -169,16 +173,12 @@ DB_PATH_ENABLED="false"         # Enable custom backup directory
 DB_PATH="/custom/backup/path"   # Custom backup location
 ```
 
-## New in Version 3.3.4 - Auto-Detection Revolution & Enhanced Reliability
+## New in Version 3.3.4 - Auto-Detection & Enhanced Reliability
 - **🔍 Foolproof Auto-Detection** - Right-click menu now uses WordPress `Theme Name:` header for 100% accurate theme detection
 - **🛡️ Smart Rollback System** - Synchronized local+remote rollback with separate safety backups and version detection
 - **💾 Robust Database Backup** - PHP-based database backup system that works with restricted backup users
 - **⚡ Streamlined Workflow** - Auto-detection eliminates need for manual type switching in 99% of cases
 - **🔧 Enhanced Configuration** - Improved rollback behavior controls and database override options
-
-## 📸 Screenshots
-
-![Screenshot of rollback window completion](_scripts/screens/rollback.jpg)
 
 ### Simplified Basic Setup For Beginners & Hobbyists
 
@@ -238,214 +238,6 @@ DB_PATH="/custom/backup/path"   # Custom backup location
 - WordPress plugin with version number in main PHP file OR theme with version in style.css
 - SSH key authentication configured (see setup guide below)
 - **pigz** for faster compression (optional, auto-falls back to gzip)
-
-## SSH Key Setup Guide
-
-### Step 1: Generate SSH Key with PuTTYgen
-
-1. **Download and open PuTTYgen** (comes with PuTTY or download separately)
-2. **Generate key pair**:
-   - Select "RSA" key type
-   - Set key size to 2048 or 4096 bits
-   - Click "Generate"
-   - Move mouse randomly in the blank area to generate randomness
-3. **Set key passphrase** (optional but recommended):
-   - Enter passphrase in "Key passphrase" field
-   - Confirm passphrase
-4. **Save the private key**:
-   - Click "Save private key"
-   - Save as `your-key-name.ppk` (PuTTY format)
-5. **Copy the public key**:
-   - Select all text in the "Public key for pasting into OpenSSH authorized_keys file" box
-   - Copy to clipboard (Ctrl+C)
-
-### Step 2: Convert PuTTY Key to OpenSSH Format
-
-**Option A: Using PuTTYgen**
-1. In PuTTYgen, go to **Conversions** → **Export OpenSSH key**
-2. Save as `id_rsa` (no extension) in your WSL home directory:
-   ```bash
-   # From Windows, save to:
-   \\wsl$\Ubuntu\home\yourusername\.ssh\id_rsa
-   ```
-
-**Option B: Using WSL command line**
-```bash
-# Install putty-tools in WSL
-sudo apt update
-sudo apt install putty-tools
-
-# Convert the .ppk file to OpenSSH format
-puttygen /mnt/c/path/to/your-key.ppk -O private-openssh -o ~/.ssh/id_rsa
-
-# Set proper permissions
-chmod 600 ~/.ssh/id_rsa
-```
-
-### Step 3: Add Public Key to Server
-
-**Method 1: Using ssh-copy-id (recommended)**
-```bash
-# Copy public key to server
-ssh-copy-id -i ~/.ssh/id_rsa.pub username@your-server-ip -p 22
-```
-
-**Method 2: Manual setup**
-1. **Create the public key file locally**:
-   ```bash
-   # Extract public key from private key
-   ssh-keygen -y -f ~/.ssh/id_rsa > ~/.ssh/id_rsa.pub
-   ```
-
-2. **Add to server manually**:
-   ```bash
-   # Connect to server with password
-   ssh username@your-server-ip -p 22
-   
-   # Create .ssh directory if it doesn't exist
-   mkdir -p ~/.ssh
-   chmod 700 ~/.ssh
-   
-   # Create/edit authorized_keys file
-   nano ~/.ssh/authorized_keys
-   
-   # Paste your public key (from PuTTYgen clipboard) into this file
-   # Save and exit (Ctrl+X, Y, Enter in nano)
-   
-   # Set proper permissions
-   chmod 600 ~/.ssh/authorized_keys
-   ```
-
-### Step 4: Test SSH Connection
-
-```bash
-# Test connection from WSL
-ssh -i ~/.ssh/id_rsa username@your-server-ip -p 22
-
-# If successful, you should connect without password prompt
-# (unless you set a passphrase on your key)
-```
-
-### Step 5: Configure SSH for Convenience (Optional)
-
-Create SSH config file for easier connections:
-```bash
-# Edit SSH config
-nano ~/.ssh/config
-
-# Add your server configuration:
-Host myserver
-    HostName your-server-ip
-    Port 22
-    User username
-    IdentityFile ~/.ssh/id_rsa
-    IdentitiesOnly yes
-
-# Set permissions
-chmod 600 ~/.ssh/config
-```
-
-Now you can connect with just:
-```bash
-ssh myserver
-```
-
-### Installing pigz (Optional - Recommended for Speed)
-
-pigz is a parallel implementation of gzip that provides **2-4x faster compression** on multi-core systems. The script automatically detects and uses pigz if available, otherwise falls back to standard gzip.
-
-**Ubuntu/Debian (WSL):**
-```bash
-sudo apt update && sudo apt install pigz
-```
-
-**CentOS/RHEL/Amazon Linux (WSL):**
-```bash
-sudo yum install pigz
-# or on newer versions:
-sudo dnf install pigz
-```
-
-**Arch Linux (WSL):**
-```bash
-sudo pacman -S pigz
-```
-
-**openSUSE (WSL):**
-```bash
-sudo zypper install pigz
-```
-
-**Remote Server Installation:**
-Install pigz on your remote server using the same commands for your server's Linux distribution.
-
-**Configuration:**
-```bash
-# In config.sh - for pigz (default, faster)
-COMPRESSION_TOOL="pigz"
-
-# In config.sh - for standard gzip
-COMPRESSION_TOOL="gzip"
-```
-
-**Performance Comparison:**
-- **gzip**: Single-threaded, slower but universally available
-- **pigz**: Multi-threaded, 2-4x faster on multi-core systems
-- **Auto-fallback**: Script uses pigz if available, gzip otherwise (no user intervention needed)
-
-### Troubleshooting SSH Issues
-
-**Permission denied (publickey)**
-```bash
-# Check key permissions
-ls -la ~/.ssh/
-# id_rsa should be 600, id_rsa.pub should be 644
-
-# Fix permissions if needed
-chmod 600 ~/.ssh/id_rsa
-chmod 644 ~/.ssh/id_rsa.pub
-chmod 700 ~/.ssh
-```
-
-**Connection refused**
-- Verify server IP and port
-- Check if SSH service is running on server
-- Ensure firewall allows SSH connections
-
-**Key not being used**
-```bash
-# Test with verbose output
-ssh -v -i ~/.ssh/id_rsa username@your-server-ip -p 22
-
-# Check if key is loaded
-ssh-add -l
-
-# Add key to agent if needed
-ssh-add ~/.ssh/id_rsa
-```
-
-### Line Ending Issues
-
-**Problem**: Getting `$'\r': command not found` errors
-
-**Cause**: Windows line endings (CRLF) in config.sh causing bash parsing errors
-
-**Quick Fix**:
-```bash
-# Fix line endings in config.sh
-sed -i 's/\r$//' config.sh
-```
-
-**Alternative fixes**:
-```bash
-# Using dos2unix (if available)
-dos2unix config.sh
-
-# Using the debug utilities
-_scripts\_advanced\debug\fix-line-endings.bat
-```
-
-**Prevention**: Always save config.sh with LF line endings, or run the sed command after editing
 
 ## Installation
 
@@ -751,6 +543,214 @@ Speed improvements come from:
 - Combined remote commands (saves ~4 seconds)
 - Optimized timeouts (saves ~2 seconds)
 
+## SSH Key Setup Guide
+
+### Step 1: Generate SSH Key with PuTTYgen
+
+1. **Download and open PuTTYgen** (comes with PuTTY or download separately)
+2. **Generate key pair**:
+   - Select "RSA" key type
+   - Set key size to 2048 or 4096 bits
+   - Click "Generate"
+   - Move mouse randomly in the blank area to generate randomness
+3. **Set key passphrase** (optional but recommended):
+   - Enter passphrase in "Key passphrase" field
+   - Confirm passphrase
+4. **Save the private key**:
+   - Click "Save private key"
+   - Save as `your-key-name.ppk` (PuTTY format)
+5. **Copy the public key**:
+   - Select all text in the "Public key for pasting into OpenSSH authorized_keys file" box
+   - Copy to clipboard (Ctrl+C)
+
+### Step 2: Convert PuTTY Key to OpenSSH Format
+
+**Option A: Using PuTTYgen**
+1. In PuTTYgen, go to **Conversions** → **Export OpenSSH key**
+2. Save as `id_rsa` (no extension) in your WSL home directory:
+   ```bash
+   # From Windows, save to:
+   \\wsl$\Ubuntu\home\yourusername\.ssh\id_rsa
+   ```
+
+**Option B: Using WSL command line**
+```bash
+# Install putty-tools in WSL
+sudo apt update
+sudo apt install putty-tools
+
+# Convert the .ppk file to OpenSSH format
+puttygen /mnt/c/path/to/your-key.ppk -O private-openssh -o ~/.ssh/id_rsa
+
+# Set proper permissions
+chmod 600 ~/.ssh/id_rsa
+```
+
+### Step 3: Add Public Key to Server
+
+**Method 1: Using ssh-copy-id (recommended)**
+```bash
+# Copy public key to server
+ssh-copy-id -i ~/.ssh/id_rsa.pub username@your-server-ip -p 22
+```
+
+**Method 2: Manual setup**
+1. **Create the public key file locally**:
+   ```bash
+   # Extract public key from private key
+   ssh-keygen -y -f ~/.ssh/id_rsa > ~/.ssh/id_rsa.pub
+   ```
+
+2. **Add to server manually**:
+   ```bash
+   # Connect to server with password
+   ssh username@your-server-ip -p 22
+   
+   # Create .ssh directory if it doesn't exist
+   mkdir -p ~/.ssh
+   chmod 700 ~/.ssh
+   
+   # Create/edit authorized_keys file
+   nano ~/.ssh/authorized_keys
+   
+   # Paste your public key (from PuTTYgen clipboard) into this file
+   # Save and exit (Ctrl+X, Y, Enter in nano)
+   
+   # Set proper permissions
+   chmod 600 ~/.ssh/authorized_keys
+   ```
+
+### Step 4: Test SSH Connection
+
+```bash
+# Test connection from WSL
+ssh -i ~/.ssh/id_rsa username@your-server-ip -p 22
+
+# If successful, you should connect without password prompt
+# (unless you set a passphrase on your key)
+```
+
+### Step 5: Configure SSH for Convenience (Optional)
+
+Create SSH config file for easier connections:
+```bash
+# Edit SSH config
+nano ~/.ssh/config
+
+# Add your server configuration:
+Host myserver
+    HostName your-server-ip
+    Port 22
+    User username
+    IdentityFile ~/.ssh/id_rsa
+    IdentitiesOnly yes
+
+# Set permissions
+chmod 600 ~/.ssh/config
+```
+
+Now you can connect with just:
+```bash
+ssh myserver
+```
+
+### Installing pigz (Optional - Recommended for Speed)
+
+pigz is a parallel implementation of gzip that provides **2-4x faster compression** on multi-core systems. The script automatically detects and uses pigz if available, otherwise falls back to standard gzip.
+
+**Ubuntu/Debian (WSL):**
+```bash
+sudo apt update && sudo apt install pigz
+```
+
+**CentOS/RHEL/Amazon Linux (WSL):**
+```bash
+sudo yum install pigz
+# or on newer versions:
+sudo dnf install pigz
+```
+
+**Arch Linux (WSL):**
+```bash
+sudo pacman -S pigz
+```
+
+**openSUSE (WSL):**
+```bash
+sudo zypper install pigz
+```
+
+**Remote Server Installation:**
+Install pigz on your remote server using the same commands for your server's Linux distribution.
+
+**Configuration:**
+```bash
+# In config.sh - for pigz (default, faster)
+COMPRESSION_TOOL="pigz"
+
+# In config.sh - for standard gzip
+COMPRESSION_TOOL="gzip"
+```
+
+**Performance Comparison:**
+- **gzip**: Single-threaded, slower but universally available
+- **pigz**: Multi-threaded, 2-4x faster on multi-core systems
+- **Auto-fallback**: Script uses pigz if available, gzip otherwise (no user intervention needed)
+
+### Troubleshooting SSH Issues
+
+**Permission denied (publickey)**
+```bash
+# Check key permissions
+ls -la ~/.ssh/
+# id_rsa should be 600, id_rsa.pub should be 644
+
+# Fix permissions if needed
+chmod 600 ~/.ssh/id_rsa
+chmod 644 ~/.ssh/id_rsa.pub
+chmod 700 ~/.ssh
+```
+
+**Connection refused**
+- Verify server IP and port
+- Check if SSH service is running on server
+- Ensure firewall allows SSH connections
+
+**Key not being used**
+```bash
+# Test with verbose output
+ssh -v -i ~/.ssh/id_rsa username@your-server-ip -p 22
+
+# Check if key is loaded
+ssh-add -l
+
+# Add key to agent if needed
+ssh-add ~/.ssh/id_rsa
+```
+
+### Line Ending Issues
+
+**Problem**: Getting `$'\r': command not found` errors
+
+**Cause**: Windows line endings (CRLF) in config.sh causing bash parsing errors
+
+**Quick Fix**:
+```bash
+# Fix line endings in config.sh
+sed -i 's/\r$//' config.sh
+```
+
+**Alternative fixes**:
+```bash
+# Using dos2unix (if available)
+dos2unix config.sh
+
+# Using the debug utilities
+_scripts\_advanced\debug\fix-line-endings.bat
+```
+
+**Prevention**: Always save config.sh with LF line endings, or run the sed command after editing
+
 ## Troubleshooting
 
 ### SSH Connection Issues
@@ -834,7 +834,7 @@ GPLv3 — freely use, modify, and distribute, with a commitment to keep the sour
 
 ## Changelog
 
-### v3.3.4 - Auto-Detection Revolution & Enhanced Reliability
+### v3.3.4 - Auto-Detection & Enhanced Reliability
 - **🔍 Foolproof Auto-Detection System** - Right-click menu now uses WordPress `Theme Name:` header for 100% accurate theme detection
 - **🛡️ Smart Rollback System** - Synchronized local+remote rollback with separate safety backups and independent version detection
 - **💾 Robust Database Backup System** - PHP-based database backup that works with restricted backup users and connection-only privileges
@@ -895,7 +895,7 @@ GPLv3 — freely use, modify, and distribute, with a commitment to keep the sour
 - **✅ Enhanced Path Flow** - Improved directory navigation and WSL path calculation
 - **🎯 Database Utilities Working** - All _scripts/ tools now function correctly
 
-### v3.1.0 - Database System Revolution & Enhanced Organization
+### v3.1.0 - Database System & Enhanced Organization
 - **🔄 Simplified Database Configuration** - Single `DB_BACKUP_MODE` variable with three clear options
 - **📊 Three Database Modes** - "off" (no backups), "manual" (tools only), "auto" (with deploy)
 - **🎯 Intuitive Database Controls** - Crystal clear naming and behavior
@@ -937,7 +937,7 @@ GPLv3 — freely use, modify, and distribute, with a commitment to keep the sour
 - **🎯 Smart File Targeting** - Automatically updates correct file based on TYPE and FOLDER_NAME from config.sh
 - **🔇 Silent Operation** - Double-click to increment version with minimal user interaction
 - **💾 Configurable Backups** - New `VERSION_BACKUP="true"` setting to control .backup file creation
-- **🔢 Patch Version Increment** - Automatically bumps patch version (4.3.4 → 4.3.5)
+- **🔢 Patch Version Increment** - Automatically bumps patch version (1.0.3 → 1.0.4)
 - **🔄 Plugin/Theme Support** - Works with both plugins (.php) and themes (style.css) seamlessly
 - **📝 Version Pattern Detection** - Finds and updates WordPress standard version formats automatically
 

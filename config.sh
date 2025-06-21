@@ -3,7 +3,7 @@
 # WordPress Plugin/Theme Fast Deployment Script - Configuration
 # Created by: lso2 (https://github.com/lso2)
 # Repository: https://github.com/lso2/wp-fast-remote-deploy
-# License: MIT
+# License: GPLv3
 
 # Script Configuration
 VERSION="3.3.4"  # Script version
