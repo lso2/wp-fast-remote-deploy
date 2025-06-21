@@ -85,6 +85,10 @@ Press any key to continue...
 - **📋 Visual Backup Selection** - Browse available backups with version numbers, dates, and file sizes
 - **⚙️ Configurable Behavior** - Choose between full sync or remote-only rollback
 
+## 📸 Rollback Screenshot
+
+![Screenshot of rollback window completion](_scripts/screens/rollback.jpg)
+
 ### Rollback Modes
 
 **Full Sync Mode (Default - `ROLLBACK_SYNC_LOCAL="true"`):**
@@ -113,10 +117,6 @@ Available backup versions for my-plugin (plugins):
 
 Enter version number to rollback to: 1    # Select by number or version
 ```
-
-## 📸 Rollback Screenshot
-
-![Screenshot of rollback window completion](_scripts/screens/rollback.jpg)
 
 ## Auto-Detection System
 
