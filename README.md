@@ -32,7 +32,7 @@ This automates several things to save time:
 
 ## Quick Usage Guide
 
-- Two files are used: a .bat in the root, and a .sh file in the .run folder.
+- The main files you will use are `deploy.bat`, `update-version.bat`, and `/_scripts/rollback.bat`.
 - Download the repo and drop it directly into your root, so that the .bat file and config file are in the same folder as your plugin folder.
 - Configure the config.sh file by adding your real paths and server details.
 - In the config file:
