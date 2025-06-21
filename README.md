@@ -132,6 +132,13 @@ The right-click menu now automatically detects whether you're working on a plugi
 - **Zero Configuration** - No more manually setting TYPE in config
 - **Accurate** - Based on WordPress requirements, not file existence
 
+
+## 📸 Right-Click Menu Screenshot
+
+![Screenshot of Right-Click Menu](_scripts/screens/screen-menu-item.jpg)
+
+![Screenshot of CMD window on completion](_scripts/screens/screen-menu-item-confirm.jpg)
+
 ## Database Backup System (Alpha - In Testing)
 
 ### Automated Database Backups
@@ -299,12 +306,6 @@ LOCAL_PATH="dev-projects"           # Auto-detected
 ### Success Messages
 - `TYPE: theme (found 'Theme Name:' in style.css)`
 - `TYPE: plugin (no 'Theme Name:' found - default to plugin)`
-
-## 📸 Screenshots
-
-![Screenshot of Right-Click Menu](_scripts/screens/screen-menu-item.jpg)
-
-![Screenshot of CMD window on completion](_scripts/screens/screen-menu-item-confirm.jpg)
 
 ### Manual Type Switching (Legacy)
 
