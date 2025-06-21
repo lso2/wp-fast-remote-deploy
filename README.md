@@ -76,16 +76,6 @@ This automates several things to save time:
 - Add the auto-detecting right-click menu by double-clicking `/_scripts/_right-click-menu/install-auto-detect-folder-switcher.bat` for instant switching with intelligent type detection
 - Manual type switchers still available: `/_scripts/_advanced/type switcher/switch-to-plugin-type.bat` and `/_scripts/_advanced/type switcher/switch-to-theme-type.bat` - move to the root of the `_scripts` folder before using so it works.
 
-### 🚀 Key Sections
-
-| Section | Description |
-|---------|-------------|
-| **[One-Click Scripts](#one-click-automation-scripts)** | Deploy, rollback, version update, database backup |
-| **[Rollback Modes](#rollback-modes)** | Full sync vs remote-only rollback options |
-| **[Database Modes](#database-modes)** | Off, manual, or automatic backup options |
-| **[Speed Modes](#speed-vs-safety-modes)** | Balance between speed and safety |
-| **[Screenshots](#-fast-deploy-script-screenshot)** | Visual guide to all features |
-
 ## Version Management
 
 ### Automatic Version Incrementer
