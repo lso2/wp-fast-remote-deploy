@@ -792,22 +792,32 @@ _scripts\_advanced\debug\fix-line-endings.bat
 project/
 ├── deploy.bat              # Windows batch script
 ├── config.sh               # Unified configuration file
-├── .run/
+├── .run/				 # Shell scripts - no need to touch
 │   ├── deploy-wsl.sh       # Main deployment script (works for both plugins and themes)
 │   ├── rollback.sh         # Smart rollback script with local+remote sync
-│   └── db-backup.sh        # Database backup script
-├── _scripts/              # Utility scripts
-│   ├── db-backup.bat      # Manual database backup utility
-│   ├── db-restore.bat     # Database restore utility
-│   ├── rollback.bat       # Rollback interface
-│   ├── switch-to-theme-type.bat    # Manual switch to theme mode
-│   ├── switch-to-plugin-type.bat   # Manual switch to plugin mode
-│   └── _right-click-menu/   # Right-click menu integration
-│       ├── install-auto-detect-folder-switcher.bat     # Install auto-detecting right-click menu
-│       ├── uninstall-auto-detect-folder-switcher.bat   # Remove auto-detecting right-click menu
-│       ├── install-folder-name-changer-menu-item.bat   # Install basic right-click menu (legacy)
-│       └── uninstall-folder-name-changer-menu-item.bat # Remove basic right-click menu (legacy)
-└── README.md              # This file
+│   ├── db-backup.sh        # Database backup script
+│   ├── db-restore.sh       # Database restore script
+│   ├── db-backup-dual.sh   # Database backup script for advanced users
+│   └── make-executable.sh	# Makes files executable
+├── _scripts/            # Utility scripts
+│   ├── db-backup.bat       # Manual database backup utility
+│   ├── db-restore.bat      # Database restore utility
+│   ├── rollback.bat        # Rollback interface
+│   ├── _right-click-menu/  # Right-click menu integration
+│   │   ├── install-auto-detect-folder-switcher.bat     # Install auto-detecting right-click menu
+│   │   └─── uninstall-auto-detect-folder-switcher.bat   # Remove auto-detecting right-click menu
+│   └── _advanced        # For advanced users
+│       ├── git-setup.bat
+│       ├── multi-server-setup.bat			# Advanced users: Setup multiple servers (optional)
+│       ├── setup-wizard.bat				# Setup wizard for advanced features (optional)
+│       ├── type switcher					
+│       │   ├── switch-to-theme-type.bat    # Manual switch to theme mode
+│       │   └── switch-to-plugin-type.bat   # Manual switch to plugin mode
+│       ├── detect-server-config
+│       │   └── # detect-server-config.sh	# Copy to server and run in SSH to generate server details
+│       └── debug
+│           └── # various debug scripts
+└── README.md   # This file
 ```
 
 ## Contributing
