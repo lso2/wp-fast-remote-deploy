@@ -76,26 +76,6 @@ This automates several things to save time:
 - Add the auto-detecting right-click menu by double-clicking `/_scripts/_right-click-menu/install-auto-detect-folder-switcher.bat` for instant switching with intelligent type detection
 - Manual type switchers still available: `/_scripts/_advanced/type switcher/switch-to-plugin-type.bat` and `/_scripts/_advanced/type switcher/switch-to-theme-type.bat` - move to the root of the `_scripts` folder before using so it works.
 
-## Quick Links
-[Summary](#summary) • [Quick Start](#quick-start) • [Features](#-features) • [Requirements](#requirements) • [Installation](#installation)
-
-## Core Features
-**[Configuration](#configuration)** • **[Version Management](#automatic-version-incrementer)** • **[Smart Rollback](#smart-rollback-system)** • **[Auto-Detection](#auto-detection-system)** • **[Database Backup](#database-backup-system-alpha---in-testing)**
-
-## Setup & Tools
-**[Sample Project Setup](#sample-data-quick-install)** • **[Right-Click Menu](#auto-detecting-right-click-menu-integration)** • **[SSH Setup](#ssh-key-setup-guide)** • **[Performance Options](#performance-optimization)**
-
-## Usage
-**[Deploy](#usage-3)** • **[How It Works](#how-it-works)** • **[Backup Organization](#backup-organization)** • **[Version Detection](#version-number-detection)**
-
-## Troubleshooting
-**[SSH Issues](#troubleshooting-ssh-issues)** • **[Line Endings](#line-ending-issues)** • **[Common Problems](#troubleshooting)** • **[Auto-Detection](#auto-detection-issues)**
-
-## Project Info
-**[File Structure](#file-structure)** • **[Changelog](#changelog)** • **[Contributing](#contributing)** • **[Support](#-support-this-project)**
-
----
-
 ### 🚀 Key Sections
 
 | Section | Description |
