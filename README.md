@@ -14,7 +14,7 @@ A time-saving one-click deployment script for local WordPress plugin AND theme d
 
 | Feature | Description | Link |
 |---------|-------------|------|
-| **🚀 Deploy** | One-click deployment script | [Usage Guide](#usage-3) |
+| **🚀 Deploy** | One-click deployment script | [Quick Usage Guide](#quick-usage-guide) |
 | **🔄 Rollback** | Smart local+remote rollback | [Rollback System](#smart-rollback-system) |
 | **📈 Version** | Auto version incrementer | [Version Management](#automatic-version-incrementer) |
 | **💾 Database** | Backup/restore database | [Database Backup](#database-backup-system-alpha---in-testing) |
