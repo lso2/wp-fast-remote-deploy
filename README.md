@@ -43,6 +43,10 @@ This automates several things to save time:
 	- Optionally, you can also customize many things, or leave it as is. Remote tar.gz is disabled by default for speed.
 - Run the script by double-clicking the .bat file. It will open a CMD window which will show you the progress and details.
 
+## Quick Start
+
+- After downloading the github release, double-click on `install-sample-data.bat` in the `/_scripts/` folder to install the whole project structure for themes and plugins in one click!
+
 #### Bonus:
 - Add the auto-detecting right-click menu by double-clicking `/_scripts/_right-click-menu/install-auto-detect-folder-switcher.bat` for instant switching with intelligent type detection
 - Manual type switchers still available: `/_scripts/_advanced/type switcher/switch-to-plugin-type.bat` and `/_scripts/_advanced/type switcher/switch-to-theme-type.bat` - move to the root of the `_scripts` folder before using so it works.
