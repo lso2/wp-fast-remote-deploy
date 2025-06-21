@@ -1,7 +1,5 @@
 # Fast WordPress Plugin/Theme Deployment Script
 
-A time-saving one-click deployment script for local WordPress plugin AND theme development, eliminates manual file copying and activation; uses wp-cli for automatic plugin reactivation with automatic local and remote backups, fallbacks, and easy setup using a unified config file.
-
 ![Windows](https://img.shields.io/badge/Windows-10%2B-blue.svg)
 ![WordPress](https://img.shields.io/badge/WordPress-5.0%2B-21759B.svg)
 ![Version](https://img.shields.io/badge/Version-3.3.5-green.svg)
@@ -9,6 +7,8 @@ A time-saving one-click deployment script for local WordPress plugin AND theme d
 
 > **Created by:** [lso2](https://github.com/lso2)  
 > **Repository:** [wp-fast-remote-deploy](https://github.com/lso2/wp-fast-remote-deploy)
+
+A time-saving one-click deployment script for local WordPress plugin AND theme development, eliminates manual file copying and activation; uses wp-cli for automatic plugin reactivation with automatic local and remote backups, fallbacks, and easy setup using a unified config file.
 
 ### ⚡ Quick Access
 
