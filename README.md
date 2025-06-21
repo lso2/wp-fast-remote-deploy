@@ -36,10 +36,6 @@ This automates several things to save time:
 - **Database Backup System** - Automated database backups with manual and auto modes
 - Gives a summary of what was done
 
-## 📸 Fast Deploy Script Screenshot
-
-![Screenshot of CMD window on completion](_scripts/screens/screen.jpg)
-
 # 📚 Table of Contents
 
 | Category | Sections |
@@ -54,6 +50,10 @@ This automates several things to save time:
 | **📸 Visuals** | [Deploy Screenshot](#-fast-deploy-script-screenshot) • [Rollback Screenshot](#-rollback-screenshot) • [Sample Data](#-sample-data-screenshot) • [Right-Click Menu](#-right-click-menu-screenshot) |
 
 ---
+
+## 📸 Fast Deploy Script Screenshot
+
+![Screenshot of CMD window on completion](_scripts/screens/screen.jpg)
 
 ## Quick Usage Guide
 
