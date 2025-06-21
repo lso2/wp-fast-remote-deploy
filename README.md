@@ -4,7 +4,7 @@ A time-saving one-click deployment script for local WordPress plugin AND theme d
 
 ![Windows](https://img.shields.io/badge/Windows-10%2B-blue.svg)
 ![WordPress](https://img.shields.io/badge/WordPress-5.0%2B-21759B.svg)
-![Version](https://img.shields.io/badge/Version-3.3.4-green.svg)
+![Version](https://img.shields.io/badge/Version-3.3.5-green.svg)
 ![License](https://img.shields.io/badge/License-GPLv3-orange.svg)
 
 > **Created by:** [lso2](https://github.com/lso2)  
@@ -118,6 +118,32 @@ Available backup versions for my-plugin (plugins):
 Enter version number to rollback to: 1    # Select by number or version
 ```
 
+## Sample Data Quick Install
+
+**📦 Instant Project Setup**
+The sample data system provides a complete WordPress development environment with one click:
+
+- **Sample Project Structure**: Creates `my-project` folder with proper WordPress plugin/theme structure
+- **Pre-configured Scripts**: All deployment scripts already set up and ready to use
+- **Test Data Included**: Sample backups for testing the rollback functionality
+
+**Installation:**
+- **One-Click Setup**: Run `_scripts\sample-data.bat` to install complete project structure
+- **Target Location**: Installs to parent directory (two levels up from script location)
+- **Automatic Extraction**: Handles tar.gz extraction with proper directory structure
+
+**What's Included:**
+- **my-plugin/** - Empty plugin starter with basic structure
+- **my-theme/** - Empty theme starter with style.css
+- **Deployment Scripts** - Pre-configured deploy.bat, config.sh, and all utilities
+- **Sample Backups** - Test files for practicing rollback functionality
+- **.plugin_backups/** - Directory with sample plugin backups
+- **.theme_backups/** - Directory with sample theme backups
+
+## 📸 Sample Data Screenshot
+
+![Screenshot of Sample Data Completion](_scripts/screens/sample-data.jpg)
+
 ## Auto-Detection System
 
 **🔍 Intelligent Type Detection**
@@ -225,6 +251,7 @@ DB_PATH="/custom/backup/path"   # Custom backup location
 - 🌐 **Auto-Detecting Right-Click Integration**: One-click script to add right-click menu with intelligent plugin/theme detection
 - ⚡ **One-Click Version Upgrader**: One-click integration so you can increment the version of your theme/plugin quickly automatically
 - 💾 **One-Click Database Backup**: Manual or automatic database backup with multiple operation modes
+- 📦 **One-Click Sample Project Setup**: Install complete WordPress development structure with sample plugin/theme and pre-configured scripts
 - 🗂️ **Auto-detect Server Config**: Drop detect-server-config.sh onto your server and run it to generate your server details automatically
 - 🔧 **WSL Integration** - Windows batch script that calls WSL bash script automatically, with automatic powershell integration
 - ⚡ **Advanced Setup Wizard** (Beta): Quickly get started with advanced features (in testing)
@@ -804,6 +831,7 @@ project/
 │   ├── db-backup.bat       # Manual database backup utility
 │   ├── db-restore.bat      # Database restore utility
 │   ├── rollback.bat        # Rollback interface
+│   ├── install-sample-data.bat     # One-click sample project installer
 │   ├── _right-click-menu/  # Right-click menu integration
 │   │   ├── install-auto-detect-folder-switcher.bat     # Install auto-detecting right-click menu
 │   │   └─── uninstall-auto-detect-folder-switcher.bat   # Remove auto-detecting right-click menu
@@ -844,6 +872,13 @@ GPLv3 — freely use, modify, and distribute, with a commitment to keep the sour
 **⭐ If this script saved you time, please star the repository!**
 
 ## Changelog
+
+### v3.3.5 - Instant Setup with Sample Data
+- **📦 One-Click Sample Project** - New `install-sample-data.bat` installs complete WordPress project structure instantly
+- **🚀 Zero-to-Deploy Setup** - Pre-configured project with plugin, theme, and deployment scripts ready to use
+- **🎯 Perfect for Beginners** - Start developing immediately without manual folder creation or configuration
+- **🧪 Testing Environment** - Includes sample backups for testing rollback functionality
+- **📁 Smart Installation** - Automatically extracts to correct location with proper directory structure
 
 ### v3.3.4 - Auto-Detection & Enhanced Reliability
 - **🔍 Foolproof Auto-Detection System** - Right-click menu now uses WordPress `Theme Name:` header for 100% accurate theme detection

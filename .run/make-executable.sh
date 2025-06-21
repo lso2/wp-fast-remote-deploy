@@ -7,6 +7,7 @@ chmod +x deploy-wsl.sh
 chmod +x db-backup.sh  
 chmod +x db-restore.sh
 chmod +x rollback.sh
+chmod +x sample-data-wsl.sh
 
 echo "✅ All scripts are now executable!"
 echo ""
