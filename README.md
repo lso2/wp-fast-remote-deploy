@@ -10,6 +10,16 @@ A time-saving one-click deployment script for local WordPress plugin AND theme d
 > **Created by:** [lso2](https://github.com/lso2)  
 > **Repository:** [wp-fast-remote-deploy](https://github.com/lso2/wp-fast-remote-deploy)
 
+### ⚡ Quick Access
+
+| Feature | Description | Link |
+|---------|-------------|------|
+| **🚀 Deploy** | One-click deployment script | [Usage Guide](#usage-3) |
+| **🔄 Rollback** | Smart local+remote rollback | [Rollback System](#smart-rollback-system) |
+| **📈 Version** | Auto version incrementer | [Version Management](#automatic-version-incrementer) |
+| **💾 Database** | Backup/restore database | [Database Backup](#database-backup-system-alpha---in-testing) |
+| **🔍 Auto-Detect** | Plugin vs Theme detection | [Auto-Detection](#auto-detection-system) |
+
 ## Summary
 
 This automates several things to save time:
@@ -29,6 +39,21 @@ This automates several things to save time:
 ## 📸 Fast Deploy Script Screenshot
 
 ![Screenshot of CMD window on completion](_scripts/screens/screen.jpg)
+
+# 📚 Table of Contents
+
+| Category | Sections |
+|----------|----------|
+| **🚀 Quick Start** | [Summary](#summary) • [Features](#-features) • [Requirements](#requirements) • [Installation](#installation) • [Quick Usage](#quick-usage-guide) |
+| **⚙️ Configuration** | [Main Config](#configuration) • [Version Detection](#version-detection) • [Performance Modes](#performance-optimization) • [SSH Setup](#ssh-key-setup-guide) |
+| **🎯 Core Features** | [Auto-Detection](#auto-detection-system) • [Version Manager](#automatic-version-incrementer) • [Smart Rollback](#smart-rollback-system) • [Database Backup](#database-backup-system-alpha---in-testing) |
+| **🛠️ Tools** | [One-Click Scripts](#one-click-automation-scripts) • [Right-Click Menu](#auto-detecting-right-click-menu-integration) • [Sample Project](#sample-data-quick-install) |
+| **📋 Usage** | [Deploy](#usage-3) • [How It Works](#how-it-works) • [Backup Organization](#backup-organization) • [Rollback Modes](#rollback-modes) |
+| **🔧 Troubleshooting** | [Common Issues](#troubleshooting) • [SSH Issues](#troubleshooting-ssh-issues) • [Line Endings](#line-ending-issues) • [Detection Issues](#auto-detection-issues) |
+| **📁 Reference** | [File Structure](#file-structure) • [Changelog](#changelog) • [Contributing](#contributing) • [Support](#-support-this-project) |
+| **📸 Visuals** | [Deploy Screenshot](#-fast-deploy-script-screenshot) • [Rollback Screenshot](#-rollback-screenshot) • [Sample Data](#-sample-data-screenshot) • [Right-Click Menu](#-right-click-menu-screenshot) |
+
+---
 
 ## Quick Usage Guide
 
@@ -50,6 +75,36 @@ This automates several things to save time:
 #### Bonus:
 - Add the auto-detecting right-click menu by double-clicking `/_scripts/_right-click-menu/install-auto-detect-folder-switcher.bat` for instant switching with intelligent type detection
 - Manual type switchers still available: `/_scripts/_advanced/type switcher/switch-to-plugin-type.bat` and `/_scripts/_advanced/type switcher/switch-to-theme-type.bat` - move to the root of the `_scripts` folder before using so it works.
+
+## Quick Links
+[Summary](#summary) • [Quick Start](#quick-start) • [Features](#-features) • [Requirements](#requirements) • [Installation](#installation)
+
+## Core Features
+**[Configuration](#configuration)** • **[Version Management](#automatic-version-incrementer)** • **[Smart Rollback](#smart-rollback-system)** • **[Auto-Detection](#auto-detection-system)** • **[Database Backup](#database-backup-system-alpha---in-testing)**
+
+## Setup & Tools
+**[Sample Project Setup](#sample-data-quick-install)** • **[Right-Click Menu](#auto-detecting-right-click-menu-integration)** • **[SSH Setup](#ssh-key-setup-guide)** • **[Performance Options](#performance-optimization)**
+
+## Usage
+**[Deploy](#usage-3)** • **[How It Works](#how-it-works)** • **[Backup Organization](#backup-organization)** • **[Version Detection](#version-number-detection)**
+
+## Troubleshooting
+**[SSH Issues](#troubleshooting-ssh-issues)** • **[Line Endings](#line-ending-issues)** • **[Common Problems](#troubleshooting)** • **[Auto-Detection](#auto-detection-issues)**
+
+## Project Info
+**[File Structure](#file-structure)** • **[Changelog](#changelog)** • **[Contributing](#contributing)** • **[Support](#-support-this-project)**
+
+---
+
+### 🚀 Key Sections
+
+| Section | Description |
+|---------|-------------|
+| **[One-Click Scripts](#one-click-automation-scripts)** | Deploy, rollback, version update, database backup |
+| **[Rollback Modes](#rollback-modes)** | Full sync vs remote-only rollback options |
+| **[Database Modes](#database-modes)** | Off, manual, or automatic backup options |
+| **[Speed Modes](#speed-vs-safety-modes)** | Balance between speed and safety |
+| **[Screenshots](#-fast-deploy-script-screenshot)** | Visual guide to all features |
 
 ## Version Management
 
@@ -132,7 +187,7 @@ The sample data system provides a complete WordPress development environment wit
 - **Test Data Included**: Sample backups for testing the rollback functionality
 
 **Installation:**
-- **One-Click Setup**: Run `_scripts\sample-data.bat` to install complete project structure
+- **One-Click Setup**: Run `_scripts\install-sample-data.bat` to install complete project structure
 - **Target Location**: Installs to parent directory (two levels up from script location)
 - **Automatic Extraction**: Handles tar.gz extraction with proper directory structure
 
@@ -143,6 +198,25 @@ The sample data system provides a complete WordPress development environment wit
 - **Sample Backups** - Test files for practicing rollback functionality
 - **.plugin_backups/** - Directory with sample plugin backups
 - **.theme_backups/** - Directory with sample theme backups
+
+**Usage Example:**
+# Run from _scripts folder
+```cmd
+install-sample-data.bat
+```
+
+# Creates this structure in parent directory:
+```cmd
+my-project/
+├── plugins/
+│   └── my-plugin/         # Empty plugin starter
+├── themes/
+│   └── my-theme/          # Empty theme starter
+├── deploy.bat             # Ready to use
+├── config.sh              # Just add SSH details
+├── update-version.bat     # Version management
+└── _scripts/              # All utilities included
+```
 
 ## 📸 Sample Data Screenshot
 
@@ -210,8 +284,15 @@ DB_PATH_ENABLED="false"         # Enable custom backup directory
 DB_PATH="/custom/backup/path"   # Custom backup location
 ```
 
-## New in Version 3.3.4 - Auto-Detection & Enhanced Reliability
-- **🔍 Foolproof Auto-Detection** - Right-click menu now uses WordPress `Theme Name:` header for 100% accurate theme detection
+## New in Version 3.3.5 - One-click Sample Data Install Script
+- **📦 One-Click Sample Project** - New `install-sample-data.bat` installs complete WordPress project structure instantly
+- **🚀 Zero-to-Deploy Setup** - Pre-configured project with plugin, theme, and deployment scripts ready to use
+- **🎯 Perfect for Beginners** - Start developing immediately without manual folder creation or configuration
+- **🧪 Testing Environment** - Includes sample backups for testing rollback functionality
+
+## New in Version 3.3.4 - Smart Rollback System, Auto-Detection, & Enhanced Reliability
+- **🛡️ Smart Rollback System** - Synchronized local+remote rollback with separate safety backups and independent version detection
+- **🔍 Auto-Detection System** - Right-click menu now uses WordPress `Theme Name:` header for 100% accurate theme detection
 - **🛡️ Smart Rollback System** - Synchronized local+remote rollback with separate safety backups and version detection
 - **💾 Robust Database Backup** - PHP-based database backup system that works with restricted backup users
 - **⚡ Streamlined Workflow** - Auto-detection eliminates need for manual type switching in 99% of cases
@@ -885,8 +966,8 @@ GPLv3 — freely use, modify, and distribute, with a commitment to keep the sour
 - **📁 Smart Installation** - Automatically extracts to correct location with proper directory structure
 
 ### v3.3.4 - Auto-Detection & Enhanced Reliability
-- **🔍 Foolproof Auto-Detection System** - Right-click menu now uses WordPress `Theme Name:` header for 100% accurate theme detection
 - **🛡️ Smart Rollback System** - Synchronized local+remote rollback with separate safety backups and independent version detection
+- **🔍 Auto-Detection System** - Right-click menu now uses WordPress `Theme Name:` header for 100% accurate theme detection
 - **💾 Robust Database Backup System** - PHP-based database backup that works with restricted backup users and connection-only privileges
 - **⚡ Streamlined Workflow** - Auto-detection eliminates need for manual type switching in 99% of use cases
 - **🔧 Enhanced Rollback Configuration** - New `ROLLBACK_SYNC_LOCAL` setting for choosing full sync vs remote-only rollback behavior
