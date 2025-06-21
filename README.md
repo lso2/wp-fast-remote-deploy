@@ -28,7 +28,7 @@ This automates several things to save time:
 
 ## 📸 Fast Deploy Script Screenshot
 
-![Screenshot of CMD window on completion](_scripts/screen/screen.jpg)
+![Screenshot of CMD window on completion](_scripts/screens/screen.jpg)
 
 ## Quick Usage Guide
 
@@ -178,7 +178,7 @@ DB_PATH="/custom/backup/path"   # Custom backup location
 
 ## 📸 Screenshots
 
-![Screenshot of rollback window completion](_scripts/screen/rollback.jpg)
+![Screenshot of rollback window completion](_scripts/screens/rollback.jpg)
 
 ### Simplified Basic Setup For Beginners & Hobbyists
 
@@ -510,9 +510,9 @@ LOCAL_PATH="dev-projects"           # Auto-detected
 
 ## 📸 Screenshots
 
-![Screenshot of Right-Click Menu](_scripts/screen/screen-menu-item.jpg)
+![Screenshot of Right-Click Menu](_scripts/screens/screen-menu-item.jpg)
 
-![Screenshot of CMD window on completion](_scripts/screen/screen-menu-item-confirm.jpg)
+![Screenshot of CMD window on completion](_scripts/screens/screen-menu-item-confirm.jpg)
 
 ### Manual Type Switching (Legacy)
 
