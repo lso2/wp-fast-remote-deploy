@@ -13,8 +13,8 @@ set "FOLDER_NAME="
 set "VERSION_BACKUP_ENABLED=false"
 set "VERSION_AUTO_CLOSE=true"
 
-:: Read config file safely
-for /f "usebackq tokens=1* delims=:" %%i in (`findstr /n "." "config.sh" 2^>nul`) do (
+:: Read config file safely, skip bash logic sections
+for /f "usebackq tokens=1* delims=:" %%i in (`findstr /n "." "config.sh" 2^>nul ^| findstr /v /c:"cut" ^| findstr /v /c:"sed"`) do (
     set "line=%%j"
     
     :: Skip empty lines and comments
