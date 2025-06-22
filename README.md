@@ -2,7 +2,7 @@
 
 ![Windows](https://img.shields.io/badge/Windows-10%2B-blue.svg)
 ![WordPress](https://img.shields.io/badge/WordPress-5.0%2B-21759B.svg)
-![Version](https://img.shields.io/badge/Version-3.4.0-green.svg)
+![Version](https://img.shields.io/badge/Version-3.4.1-green.svg)
 ![License](https://img.shields.io/badge/License-GPLv3-orange.svg)
 
 > **Created by:** [lso2](https://github.com/lso2)  
