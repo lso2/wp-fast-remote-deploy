@@ -6,7 +6,7 @@
 # License: GPLv3
 
 # Script Configuration
-VERSION="3.3.4"  # Script version
+VERSION="3.4.0"  # Script version
 
 # ============================================================================
 # REQUIRED: CONFIG - Quickly switch between plugins/themes & Set Type
@@ -81,6 +81,9 @@ SKIP_REMOTE_FOLDER_RENAME=false      # Skip renaming remote folder backup
 # Compression settings
 COMPRESSION_LEVEL=1                  # 1=fastest, 9=best compression (default: 1 for speed)
 COMPRESSION_TOOL="pigz"              # pigz (parallel/faster) or gzip (standard)
+
+# Increment the local version if it is the same as the remote version
+AUTO_INCREMENT_VERSION="true"  # Set to "false" to skip version comparison and auto-increment
 
 # Backup file (folder-name.php or style.css) before incrementing version with update-version.bat
 VERSION_BACKUP="false"

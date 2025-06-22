@@ -1,9 +1,9 @@
 @echo off
 setlocal enabledelayedexpansion
 
-:: Look for config.sh in current directory
-if not exist "config.sh" (
-    echo Error: config.sh not found in current directory
+:: Look for config.sh in parent directory
+if not exist "..\config.sh" (
+    echo Error: config.sh not found in parent directory
     exit /b 1
 )
 
@@ -14,7 +14,7 @@ set "VERSION_BACKUP_ENABLED=false"
 set "VERSION_AUTO_CLOSE=true"
 
 :: Read config file safely, skip bash logic sections
-for /f "usebackq tokens=1* delims=:" %%i in (`findstr /n "." "config.sh" 2^>nul ^| findstr /v /c:"cut" ^| findstr /v /c:"sed"`) do (
+for /f "usebackq tokens=1* delims=:" %%i in (`findstr /n "." "..\config.sh" 2^>nul ^| findstr /v /c:"cut" ^| findstr /v /c:"sed"`) do (
     set "line=%%j"
     
     :: Skip empty lines and comments
@@ -71,11 +71,11 @@ if "%FOLDER_NAME%"=="your-folder-name" (
     exit /b 1
 )
 
-:: Determine target file based on project type
+:: Determine target file based on project type (go up one directory to find the folder)
 if "%PROJECT_TYPE%"=="plugin" (
-    set "TARGET_FILE=%FOLDER_NAME%\%FOLDER_NAME%.php"
+    set "TARGET_FILE=..\%FOLDER_NAME%\%FOLDER_NAME%.php"
 ) else (
-    set "TARGET_FILE=%FOLDER_NAME%\style.css"
+    set "TARGET_FILE=..\%FOLDER_NAME%\style.css"
 )
 
 if not exist "%TARGET_FILE%" (
@@ -126,8 +126,10 @@ if "%updated%"=="false" (
     echo Make sure your file has proper version headers
 )
 
-:: Check if should auto-close
-if "%VERSION_AUTO_CLOSE%"=="false" (
+:: Check if should auto-close (override for deployment)
+if "%VERSION_AUTO_CLOSE_OVERRIDE%"=="true" (
+    goto :eof
+) else if "%VERSION_AUTO_CLOSE%"=="false" (
     echo.
     echo Version update completed.
     pause

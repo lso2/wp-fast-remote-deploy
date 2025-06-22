@@ -5,8 +5,7 @@ REM Repository: https://github.com/lso2/wp-fast-remote-deploy
 REM License: MIT
 
 cd /d "%~dp0"
-echo Starting plugin deployment from %CD%...
-echo.
+REM echo Starting plugin deployment from %CD%...
 
 REM Get the current directory path
 set "CURRENT_DIR=%~dp0"
@@ -54,7 +53,7 @@ set "WSL_DIR=/mnt/%DRIVE_LETTER%%WSL_PATH%"
 REM Suppress Perl locale warnings
 set "PERL_BADLANG=0"
 
-echo Converted path: %WSL_DIR%
+REM echo Converted path: %WSL_DIR%
 
 wsl -e bash -c "export PERL_BADLANG=0 && cd '%WSL_DIR%' && chmod +x ./.run/deploy-wsl.sh && ./.run/deploy-wsl.sh"
 

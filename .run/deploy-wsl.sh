@@ -37,20 +37,38 @@ BACKUP_DIR="${LOCAL_BASE}/${LOCAL_BACKUP_FOLDER}/backups_${FOLDER_NAME}"
 SSH_OPTS="-i $SSH_KEY -p $SSH_PORT -o ControlMaster=auto -o ControlPath=/tmp/ssh-%r@%h:%p -o ControlPersist=30s -o ConnectTimeout=3 -o BatchMode=yes -o StrictHostKeyChecking=no"
 
 # Colors for output - cleaner scheme
-RED='\033[38;2;239;68;68m'      # Clean red
-GREEN='\033[38;2;34;197;94m'    # Clean green
-YELLOW='\033[1;33m'				# Yellow
-GOLD='\033[38;2;251;191;36m'	# Gold
-BLUE='\033[38;2;59;130;246m'    # Clean blue
-PURPLE='\033[38;2;147;51;234m'  # Clean purple
-CYAN='\033[38;2;6;182;212m'     # Clean cyan
-PINK='\033[38;2;236;72;153m'    # Clean pink
-GREY='\033[38;2;107;114;128m'   # Muted grey
-WHITE='\033[38;2;255;255;255m'  # Pure white
-NC='\033[0m' 					# No Color
+RED='\033[38;2;239;68;68m'       # Clean red
+GREEN='\033[38;2;34;197;94m'     # Clean green
+YELLOW='\033[1;33m'				 # Yellow
+GOLD='\033[38;2;251;191;36m'	 # Gold
+BLUE='\033[38;2;59;130;246m'     # Clean blue
+PURPLE='\033[38;2;147;51;234m'   # Clean purple
+PURPLE2='\033[38;2;177;81;255m'  # Lighter purple
+PURPLE3='\033[38;2;207;111;255m' # Brighter purple
+CYAN='\033[38;2;6;182;212m'      # Clean cyan
+PINK='\033[38;2;236;72;153m'     # Clean pink
+GREY='\033[38;2;107;114;128m'    # Muted grey
+GREY2='\033[38;2;150;160;170m'   # Muted lighter grey
+GREY3='\033[38;2;187;194;208m'   # Muted brighter grey
+WHITE='\033[38;2;255;255;255m'   # Pure white
+NC='\033[0m' 					 # No Color
 
+echo -e "${GREY}---------------------------------------------------${NC}"
 echo ""
-echo -e "${GREY} Deployment script v$VERSION${NC}"
+echo -e "${BLUE}          Fast Deployment Script ${GREY}v$VERSION${NC}"
+# Convert WSL path to Windows path properly using bash regex
+if [[ "$SCRIPT_ROOT_DIR" =~ ^/mnt/([a-z])/(.*) ]]; then
+    DRIVE_LETTER="${BASH_REMATCH[1]^^}"
+    REST_PATH="${BASH_REMATCH[2]//\//\\\\}"
+    WIN_PATH="${DRIVE_LETTER}:\\${REST_PATH}"
+else
+    WIN_PATH="$SCRIPT_ROOT_DIR"
+fi
+echo -e ""
+echo -e "${GREY}---------------------------------------------------${NC}"
+echo -e ""
+echo -e "${GREY} Local path:${NC} ${GREY}$WIN_PATH\\\\$FOLDER_NAME${NC}"
+# echo -e "${GREY} Converted path:${NC} ${GREY}$SCRIPT_ROOT_DIR${NC}"
 echo ""
 echo -e "${PINK}+  Deploy $TYPE:${NC} ${GOLD}$FOLDER_NAME${NC}"
 
@@ -86,7 +104,84 @@ fi
 # Legacy compatibility
 PLUGIN_VERSION="$VERSION_NUMBER"
 
-echo -e "${PINK}+  ${TYPE^} Version:${NC} ${WHITE}$VERSION_NUMBER${NC}"
+# Show version immediately like the original script
+echo -e "${PURPLE}+  Local ${TYPE} version:${NC} ${WHITE}$VERSION_NUMBER${NC}"
+
+# Check if versions match and auto-increment if enabled
+if [[ "$AUTO_INCREMENT_VERSION" == "true" ]]; then
+    # Get remote version by connecting to server
+    REMOTE_VERSION=$(ssh $SSH_OPTS "$SSH_USER@$SSH_HOST" "
+        export LC_ALL=C LANG=C LANGUAGE=C TERM=xterm
+        if [ -d '$REMOTE_TARGET_DIR/$FOLDER_NAME' ]; then
+            if [ '$TYPE' = 'theme' ]; then
+                grep -i version '$REMOTE_TARGET_DIR/$FOLDER_NAME/style.css' | head -1 | grep -o '[0-9]\+\.[0-9]\+\.*[0-9]*' | head -1
+            else
+                grep -i version '$REMOTE_TARGET_DIR/$FOLDER_NAME/$FOLDER_NAME.php' | head -1 | grep -o '[0-9]\+\.[0-9]\+\.*[0-9]*' | head -1
+            fi
+        else
+            echo 'not_found'
+        fi
+    " 2>/dev/null)
+    
+    if [[ -z "$REMOTE_VERSION" || "$REMOTE_VERSION" == "not_found" ]]; then
+        REMOTE_VERSION="not found"
+    fi
+    
+    if [[ "$REMOTE_VERSION" != "not found" ]]; then
+        # Update the line to show both versions
+        echo -e "\r\033[1A\033[K${PURPLE}+  Local ${TYPE} version:${NC} ${WHITE}$VERSION_NUMBER${NC}  ${GREY}|${NC}  ${PURPLE2}Remote Version:${NC} ${WHITE}$REMOTE_VERSION${NC}"
+        
+        if [[ "$VERSION_NUMBER" == "$REMOTE_VERSION" ]]; then
+            echo -e "${GREY}+  Checking remote version...${NC}"
+            
+            # Implement version increment logic directly in bash
+            # Determine target file based on type
+            if [[ "$TYPE" == "theme" ]]; then
+                TARGET_FILE="$LOCAL_TARGET_DIR/style.css"
+            else
+                TARGET_FILE="$LOCAL_TARGET_DIR/$FOLDER_NAME.php"
+            fi
+            
+            # Find current version and increment it
+            CURRENT_VER="$VERSION_NUMBER"
+            
+            # Increment patch version
+            IFS='.' read -r major minor patch <<< "$CURRENT_VER"
+            major=${major:-1}
+            minor=${minor:-0}
+            patch=${patch:-0}
+            patch=$((patch + 1))
+            NEW_VER="$major.$minor.$patch"
+            
+            # Update the file
+            sed -i "s/\( \* Version: \)$CURRENT_VER/\1$NEW_VER/" "$TARGET_FILE"
+            
+            # For plugins, also update define version if it exists
+            if [[ "$TYPE" == "plugin" ]]; then
+                sed -i "s/'$CURRENT_VER'/'$NEW_VER'/" "$TARGET_FILE"
+            fi
+            
+            UPDATE_RESULT=0
+            
+            # Re-extract the updated version
+            if [[ "$TYPE" == "theme" ]]; then
+                NEW_VERSION_NUMBER=$(grep -m1 "Version:" "$LOCAL_TARGET_DIR/style.css" | sed 's/.*Version:[[:space:]]*\([0-9.]*\).*/\1/' | tr -d "\"' ")
+            else
+                NEW_VERSION_NUMBER=$(grep -m1 "Version:" "$LOCAL_TARGET_DIR/$FOLDER_NAME.php" | sed 's/.*Version:[[:space:]]*\([0-9.]*\).*/\1/' | tr -d "\"' ")
+            fi
+            
+            # Verify the version actually changed
+            if [[ "$NEW_VERSION_NUMBER" == "$VERSION_NUMBER" ]]; then
+                # Version increment failed, show error
+                echo -e "\r\033[1A\033[K${RED}+  Version increment failed!${NC} (stayed at $VERSION_NUMBER)"
+            else
+                # Version increment succeeded
+                echo -e "\r\033[1A\033[K${PURPLE3}+  Local ${TYPE} auto-incremented to:${NC} ${WHITE}$NEW_VERSION_NUMBER${NC}"
+                VERSION_NUMBER="$NEW_VERSION_NUMBER"
+            fi
+        fi
+    fi
+fi
 echo ""
 
 # Create backup directories
@@ -273,8 +368,12 @@ if [ "$DB_BACKUP_MODE" = "auto" ]; then
     fi
 fi
 
+# Upload success message, replaces previous line
+echo -e "\r\033[1A\033[K${PURPLE}+  Creating local backup...  ${PURPLE3}SUCCESS!${NC}"
+echo -e ""
+
 # Now connect to remote (SSH connection should be established)
-echo -e "${BLUE}+  Preparing remote...${NC}"
+echo -e "${GREY}+  Preparing remote ${TYPE} upload...${NC}"
 
 # Establish master connection and do all remote prep
 WP_CLI_CHECK=$(ssh $SSH_OPTS "$SSH_USER@$SSH_HOST" "
@@ -354,18 +453,17 @@ WP_CLI_CHECK=$(ssh $SSH_OPTS "$SSH_USER@$SSH_HOST" "
 " 2>/dev/null)
 
 USE_WP_CLI=false
-REMOTE_VERSION="unknown"
 if [[ "$WP_CLI_CHECK" == *"wp_available"* ]]; then
     USE_WP_CLI=true
 fi
 
-# Extract remote version if available
-if [[ "$WP_CLI_CHECK" == *"backed_up_and_renamed:"* ]]; then
+# Extract remote version if available (only if auto-increment is disabled)
+if [[ "$WP_CLI_CHECK" == *"backed_up_and_renamed:"* && "$AUTO_INCREMENT_VERSION" != "true" ]]; then
     REMOTE_VERSION=$(echo "$WP_CLI_CHECK" | grep -o "backed_up_and_renamed:[^[:space:]]*" | cut -d':' -f2)
 fi
 
-echo ""
-echo -e "${CYAN}+  Uploading...${NC}"
+#echo ""
+echo -e "${CYAN}+  Uploading ${TYPE}...${NC}"
 scp -i "$SSH_KEY" -P "$SSH_PORT" "$TEMP_TAR" "$SSH_USER@$SSH_HOST:/tmp/$FOLDER_NAME-upload.tar.gz" 2>/dev/null && \
 ssh -i "$SSH_KEY" -p "$SSH_PORT" "$SSH_USER@$SSH_HOST" "cd '$REMOTE_TARGET_DIR' && tar -xzf /tmp/$FOLDER_NAME-upload.tar.gz && rm /tmp/$FOLDER_NAME-upload.tar.gz" 2>/dev/null
 
@@ -529,9 +627,9 @@ if [ "$MULTI_SERVER_ENABLED" = "true" ]; then
             PRODUCTION_SUCCESS=$?
             
             if [ $PRODUCTION_SUCCESS -eq 0 ]; then
-                echo -e "${GREEN}✅ Production deployment complete!${NC}"
+                echo -e "${GREEN}+  Production deployment complete!${NC}"
             else
-                echo -e "${RED}❌ Production deployment failed${NC}"
+                echo -e "${RED}+  Production deployment failed${NC}"
             fi
         else
             echo -e "${GREY}Production deployment skipped.${NC}"
@@ -550,8 +648,8 @@ if [ "$SKIP_NORMAL_DEPLOYMENT" = "false" ]; then
     echo ""
     if [[ "$SKIP_WP_CLI" != true && "$USE_WP_CLI" == true ]]; then
         if [[ "$TYPE" == "theme" ]]; then
-            echo -e "${PINK}+  Theme deployment complete${NC}"
-            echo -e "${WHITE}+  Theme ready for activation in WP Admin → Appearance → Themes ${GREY}(if different theme name)${NC}"
+            echo -e "${GREEN}+  Theme deployment complete!${NC}"
+            echo -e "${GREY2}+  Theme ready for activation in WP Admin → Appearance → Themes ${GREY}(if different theme name)${NC}"
         else
             echo -e "${PINK}+  Reactivating plugin...${NC}"
             ssh -i "$SSH_KEY" -p "$SSH_PORT" "$SSH_USER@$SSH_HOST" "export LC_ALL=C LANG=C LANGUAGE=C TERM=xterm; cd '$WP_PATH' && wp plugin activate '$FOLDER_NAME' --allow-root" >/dev/null 2>&1
@@ -619,14 +717,24 @@ if [ "$MULTI_SERVER_ENABLED" = "true" ]; then
         fi
     fi
     
-    echo -e "${PURPLE}+  Files:${NC} $FILE_COUNT_INFO"
+    echo -e "${PURPLE2}+  Files:${NC} $FILE_COUNT_INFO"
 else
+
+
+	# Upload success message, replaces previous line
     echo -e "${GREEN}---------------------------------------------------${NC}"
     echo -e "${GREEN}+  Deployment successful!${NC}"
     echo -e "${GREEN}---------------------------------------------------${NC}"
     echo ""
-    echo -e "${CYAN}+  Previous ${TYPE^} Version:${NC} ${WHITE}$REMOTE_VERSION${NC}"
-    echo -e "${CYAN}+  New ${TYPE^} Version:${NC} ${WHITE}$VERSION_NUMBER${NC}"
+    if [[ "$AUTO_INCREMENT_VERSION" == "true" && -n "$REMOTE_VERSION" && "$REMOTE_VERSION" != "not found" ]]; then
+        echo -e "${CYAN}+  Previous ${TYPE^} Version:${NC} ${WHITE}$REMOTE_VERSION${NC}"
+        echo -e "${CYAN}+  New ${TYPE^} Version:${NC} ${WHITE}$VERSION_NUMBER${NC}"
+    elif [[ -n "$REMOTE_VERSION" ]]; then
+        echo -e "${CYAN}+  Previous ${TYPE^} Version:${NC} ${WHITE}$REMOTE_VERSION${NC}"
+        echo -e "${CYAN}+  New ${TYPE^} Version:${NC} ${WHITE}$VERSION_NUMBER${NC}"
+    else
+        echo -e "${CYAN}+  ${TYPE^} Version:${NC} ${WHITE}$VERSION_NUMBER${NC}"
+    fi
     echo -e "${PURPLE}+  Files:${NC} $FILE_COUNT_INFO"
 fi
 echo ""

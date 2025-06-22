@@ -2,7 +2,7 @@
 
 ![Windows](https://img.shields.io/badge/Windows-10%2B-blue.svg)
 ![WordPress](https://img.shields.io/badge/WordPress-5.0%2B-21759B.svg)
-![Version](https://img.shields.io/badge/Version-3.3.5-green.svg)
+![Version](https://img.shields.io/badge/Version-3.4.0-green.svg)
 ![License](https://img.shields.io/badge/License-GPLv3-orange.svg)
 
 > **Created by:** [lso2](https://github.com/lso2)  
@@ -57,7 +57,7 @@ This automates several things to save time:
 
 ## Quick Usage Guide
 
-- The main files you will use are `deploy.bat`, `update-version.bat`, and `/_scripts/rollback.bat`.
+- The main files you will use are `deploy.bat`, `_scripts/update-version.bat`, and `_scripts/rollback.bat`.
 - Download the repo and drop it directly into your root, so that the .bat file and config file are in the same folder as your plugin folder.
 - Configure the config.sh file by adding your real paths and server details.
 - In the config file:
@@ -67,6 +67,7 @@ This automates several things to save time:
 	- Set up your ssh connection
 	- Optionally, you can also customize many things, or leave it as is. Remote tar.gz is disabled by default for speed.
 - Run the script by double-clicking the .bat file. It will open a CMD window which will show you the progress and details.
+- **NEW: Automatic Version Increment** - When local and remote versions match, the script automatically increments your local version before deployment!
 
 ## Quick Start
 
@@ -438,6 +439,9 @@ REMOTE_BASE="/path/to/wordpress/root"
 
 # Rollback Configuration
 ROLLBACK_SYNC_LOCAL="true"     # "true" = rollback both local and remote, "false" = remote only
+
+# Auto-Increment Configuration
+AUTO_INCREMENT_VERSION="true"  # "true" = auto-increment when versions match, "false" = skip version checking
 
 # Database Backup Configuration
 DB_BACKUP_MODE="manual"        # "off" = no backups, "manual" = backup tools only, "auto" = backup with deploy
@@ -927,6 +931,17 @@ GPLv3 — freely use, modify, and distribute, with a commitment to keep the sour
 **⭐ If this script saved you time, please star the repository!**
 
 ## Changelog
+
+### v3.4.0 - Automatic Version Increment with Smart Deployment
+- **⚡ Automatic Version Increment** - When local and remote versions match, automatically increments local version before deployment
+- **🎯 Smart Version Display** - Shows both local and remote versions side-by-side for better version awareness
+- **⚙️ Configurable Auto-Increment** - New `AUTO_INCREMENT_VERSION="true"` setting (default enabled) with zero performance impact when disabled
+- **🔄 Seamless Integration** - Uses existing proven `update-version.bat` logic for reliable version incrementing
+- **📊 Enhanced Output Flow** - Clean progression from single version display to dual version comparison to increment confirmation
+- **🛠️ Script Organization** - Moved `update-version.bat` to `_scripts/` folder for better organization
+- **🚀 Streamlined Workflow** - Eliminates manual version incrementing when deploying same versions, prevents version conflicts
+- **⚠️ Smart Fallback** - Shows clear error messages if version increment fails, maintains deployment safety
+- **📁 Path Display Enhancement** - Added colored deployment path information for better user feedback
 
 ### v3.3.5 - Instant Setup with Sample Data
 - **📦 One-Click Sample Project** - New `install-sample-data.bat` installs complete WordPress project structure instantly
