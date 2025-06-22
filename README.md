@@ -1086,7 +1086,7 @@ If this tool has saved you time and made your WordPress development workflow smo
 **Buy me a coffee!**
 
 [![Ko-fi](https://img.shields.io/badge/Ko--fi-F16061?style=for-the-badge&logo=ko-fi&logoColor=white)](https://techreader.com/ko-fi)
-[![PayPal](https://img.shields.io/badge/PayPal-00457C?style=for-the-badge&logo=paypal&logoColor=white)](https://www.paypal.com/ncp/payment/8VLYCGR6SM6A4)
+[![PayPal](https://img.shields.io/badge/PayPal-00457C?style=for-the-badge&logo=paypal&logoColor=white)](https://techreader.com/paypal)
 
 **Why donate?**
 - ☕ Fuel more late-night coding sessions
