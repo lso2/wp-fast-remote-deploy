@@ -3,7 +3,7 @@
 # WordPress Fast Deploy - Database Backup Script (Dual Method)
 # Created by: lso2 (https://github.com/lso2)
 # Repository: https://github.com/lso2/wp-fast-remote-deploy
-# License: MIT
+# License: GPLv3
 
 # Load configuration
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"

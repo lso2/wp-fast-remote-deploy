@@ -932,6 +932,14 @@ GPLv3 — freely use, modify, and distribute, with a commitment to keep the sour
 
 ## Changelog
 
+### v3.4.1 - Enhanced Rollback Script Sorting
+- **🔢 Proper Version-First Sorting** - Rollback script now sorts backups by semantic version first (2.1.0, 2.0.0, 1.10.5, 1.2.3), then by date for same versions
+- **📅 Secondary Date Sorting** - Multiple backups of the same version are sorted chronologically (newest first)
+- **🎯 Consistent Number Assignment** - Backup selection numbers now follow logical version order instead of random file dates
+- **⚡ Enhanced AWK Sorting Logic** - Improved sortable version conversion with zero-padded formatting for reliable string comparison
+- **🔄 Unified Sorting Algorithm** - Both list_backups() and deploy_rollback() use identical sorting for consistent numbering
+- **🛠️ Better User Experience** - Easy-to-find backup versions with newest version always appearing as #1 in the list
+
 ### v3.4.0 - Automatic Version Increment with Smart Deployment
 - **⚡ Automatic Version Increment** - When local and remote versions match, automatically increments local version before deployment
 - **🎯 Smart Version Display** - Shows both local and remote versions side-by-side for better version awareness

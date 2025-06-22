@@ -3,7 +3,7 @@
 # WordPress Fast Deploy - Rollback Script
 # Created by: lso2 (https://github.com/lso2)
 # Repository: https://github.com/lso2/wp-fast-remote-deploy
-# License: MIT
+# License: GPLv3
 
 # Load configuration
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -144,7 +144,7 @@ list_backups() {
         echo -e "${CYAN}   |  #  | Version      | Date Created        | Size     | Filename${NC}"
         echo -e "${GREY}   | --- | ------------ | ------------------- | -------- | ------------------${NC}"
         
-        # Process and sort data only
+        # Process and sort data with proper version sorting
         ls -la *.tar.gz 2>/dev/null | awk -v folder="$FOLDER_NAME" -v mapping="$TEMP_MAPPING" '
         function human_size(bytes) {
 			if (bytes >= 1073741824) {
@@ -157,6 +157,34 @@ list_backups() {
 				return sprintf("%d\033[38;2;107;114;128m B\033[0m   ", bytes)
 			}
 		}
+        
+        function version_to_sortable(version_str) {
+            # Convert version string to sortable format: major.minor.patch -> mmmmm.nnnnn.ppppp
+            # This handles versions like 1.2.3, 1.10.5, 2.0, etc.
+            if (version_str == "unknown") {
+                return "00000.00000.00000"
+            }
+            
+            # Split version by dots
+            split(version_str, version_parts, "\\.")
+            major = (version_parts[1] != "") ? version_parts[1] : 0
+            minor = (version_parts[2] != "") ? version_parts[2] : 0
+            patch = (version_parts[3] != "") ? version_parts[3] : 0
+            
+            # Convert to zero-padded format for string sorting (descending)
+            return sprintf("%05d.%05d.%05d", major, minor, patch)
+        }
+        
+        function extract_timestamp(filename) {
+            # Extract timestamp from filename for secondary sorting
+            # Look for patterns like 20240101-123456 or just use modification time as fallback
+            if (match(filename, /[0-9]{8}-[0-9]{6}/)) {
+                return substr(filename, RSTART, RLENGTH)
+            }
+            # Use file date as fallback timestamp
+            return $6 $7 $8
+        }
+        
         {
             if ($9 ~ /\.tar\.gz$/) {
                 # Skip safety backups in the main list
@@ -183,22 +211,38 @@ list_backups() {
                 # Convert size to human readable with proper padding
                 size_human = human_size($5)
                 
-                # Store for sorting with version as key for date sorting
-                lines[NR] = sprintf("%s|%s|%s|%s", version, date_created, size_human, $9)
+                # Get sortable version and timestamp for proper sorting
+                sortable_version = version_to_sortable(version)
+                timestamp = extract_timestamp($9)
+                
+                # Create composite sort key: version (for primary sort) + timestamp (for secondary sort)
+                # We want newer versions first, so we reverse the version sort by prefixing with 99999 minus the values
+                split(sortable_version, v_parts, "\\.")
+                rev_major = sprintf("%05d", 99999 - v_parts[1])
+                rev_minor = sprintf("%05d", 99999 - v_parts[2])
+                rev_patch = sprintf("%05d", 99999 - v_parts[3])
+                
+                # For same version, we want newer timestamps first, so reverse timestamp too
+                sort_key = rev_major "." rev_minor "." rev_patch "|" timestamp
+                
+                # Store data with sort key
+                lines[sort_key] = sprintf("%s|%s|%s|%s", version, date_created, size_human, $9)
             }
         }
         END {
-            # Sort by date (reverse chronological)
-            n = asorti(lines, sorted_indices)
-            for (i = n; i >= 1; i--) {
-                split(lines[sorted_indices[i]], parts, "|")
+            # Sort all entries by the composite key
+            n = asorti(lines, sorted_keys)
+            
+            # Output in the sorted order (newest versions first, newest dates within versions first)
+            for (i = 1; i <= n; i++) {
+                split(lines[sorted_keys[i]], parts, "|")
                 version = parts[1]
                 date_created = parts[2] 
                 size = parts[3]
                 filename = parts[4]
                 
-                # Assign number (newest first)
-                num = n - i + 1
+                # Assign sequential numbers
+                num = i
                 
                 # Save mapping to file (number -> version)
                 print num ":" version >> mapping
@@ -232,11 +276,29 @@ deploy_rollback() {
             return 1
         }
         
-        # Clear and regenerate mapping
+        # Clear and regenerate mapping with same sorting logic as list_backups
         > "$TEMP_MAPPING"
         
         if ls *.tar.gz >/dev/null 2>&1; then
             ls -la *.tar.gz 2>/dev/null | awk -v folder="$FOLDER_NAME" -v mapping="$TEMP_MAPPING" '
+            function version_to_sortable(version_str) {
+                if (version_str == "unknown") {
+                    return "00000.00000.00000"
+                }
+                split(version_str, version_parts, "\\.")
+                major = (version_parts[1] != "") ? version_parts[1] : 0
+                minor = (version_parts[2] != "") ? version_parts[2] : 0
+                patch = (version_parts[3] != "") ? version_parts[3] : 0
+                return sprintf("%05d.%05d.%05d", major, minor, patch)
+            }
+            
+            function extract_timestamp(filename) {
+                if (match(filename, /[0-9]{8}-[0-9]{6}/)) {
+                    return substr(filename, RSTART, RLENGTH)
+                }
+                return $6 $7 $8
+            }
+            
             {
                 if ($9 ~ /\.tar\.gz$/) {
                     # Skip safety backups
@@ -255,15 +317,24 @@ deploy_rollback() {
                         version = "unknown"
                     }
                     
-                    lines[NR] = sprintf("%s|%s", version, $9)
+                    # Same sorting logic as list_backups
+                    sortable_version = version_to_sortable(version)
+                    timestamp = extract_timestamp($9)
+                    split(sortable_version, v_parts, "\\.")
+                    rev_major = sprintf("%05d", 99999 - v_parts[1])
+                    rev_minor = sprintf("%05d", 99999 - v_parts[2])
+                    rev_patch = sprintf("%05d", 99999 - v_parts[3])
+                    sort_key = rev_major "." rev_minor "." rev_patch "|" timestamp
+                    
+                    lines[sort_key] = sprintf("%s|%s", version, $9)
                 }
             }
             END {
-                n = asorti(lines, sorted_indices)
-                for (i = n; i >= 1; i--) {
-                    split(lines[sorted_indices[i]], parts, "|")
+                n = asorti(lines, sorted_keys)
+                for (i = 1; i <= n; i++) {
+                    split(lines[sorted_keys[i]], parts, "|")
                     version = parts[1]
-                    num = n - i + 1
+                    num = i
                     print num ":" version >> mapping
                 }
             }'

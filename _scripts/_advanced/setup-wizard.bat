@@ -2,7 +2,7 @@
 REM WordPress Fast Deploy v3.0.0 - Advanced Features Setup Wizard
 REM Created by: lso2 (https://github.com/lso2)
 REM Repository: https://github.com/lso2/wp-fast-remote-deploy
-REM License: MIT
+REM License: GPLv3
 
 cd /d "%~dp0\..\.."
 echo.

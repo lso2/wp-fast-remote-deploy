@@ -3,7 +3,7 @@
 # WordPress Fast Deploy - Sample Data Installer
 # Created by: lso2 (https://github.com/lso2)
 # Repository: https://github.com/lso2/wp-fast-remote-deploy
-# License: MIT
+# License: GPLv3
 
 # Colors for output - matching deploy-wsl.sh
 RED='\033[38;2;239;68;68m'      # Clean red
