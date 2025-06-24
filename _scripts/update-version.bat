@@ -71,11 +71,13 @@ if "%FOLDER_NAME%"=="your-folder-name" (
     exit /b 1
 )
 
-:: Determine target file based on project type (go up one directory to find the folder)
+:: Determine target files based on project type (go up one directory to find the folder)
 if "%PROJECT_TYPE%"=="plugin" (
     set "TARGET_FILE=..\%FOLDER_NAME%\%FOLDER_NAME%.php"
+    set "README_FILE=..\%FOLDER_NAME%\readme.txt"
 ) else (
     set "TARGET_FILE=..\%FOLDER_NAME%\style.css"
+    set "README_FILE=..\%FOLDER_NAME%\readme.txt"
 )
 
 if not exist "%TARGET_FILE%" (
@@ -90,6 +92,12 @@ if "%VERSION_BACKUP_ENABLED%"=="true" (
     if !errorlevel! equ 0 (
         echo Backup created: %TARGET_FILE%.backup
     )
+    if exist "%README_FILE%" (
+        copy "%README_FILE%" "%README_FILE%.backup" >nul 2>&1
+        if !errorlevel! equ 0 (
+            echo Backup created: %README_FILE%.backup
+        )
+    )
 )
 
 :: Find and replace version numbers using PowerShell for precise replacement
@@ -102,6 +110,11 @@ if "%PROJECT_TYPE%"=="plugin" (
         echo Plugin header version updated: %%v -^> !new_version!
         powershell -Command "(Get-Content '%TARGET_FILE%') -replace '( \* Version: )%%v', '${1}!new_version!' | Set-Content '%TARGET_FILE%'" >nul 2>&1
         set "updated=true"
+        
+        :: Update readme.txt Stable tag if file exists
+        if exist "%README_FILE%" (
+            call :update_readme_stable_tag "%%v" "!new_version!"
+        )
     )
     
     :: Find define version
@@ -118,6 +131,11 @@ if "%PROJECT_TYPE%"=="plugin" (
         echo Theme version updated: %%v -^> !new_version!
         powershell -Command "(Get-Content '%TARGET_FILE%') -replace '( \* Version: )%%v', '${1}!new_version!' | Set-Content '%TARGET_FILE%'" >nul 2>&1
         set "updated=true"
+        
+        :: Update readme.txt Stable tag if file exists
+        if exist "%README_FILE%" (
+            call :update_readme_stable_tag "%%v" "!new_version!"
+        )
     )
 )
 
@@ -165,4 +183,15 @@ set /a patch=!patch! 2>nul || set "patch=0"
 set /a patch+=1
 
 endlocal & set "%~2=%major%.%minor%.%patch%"
+goto :eof
+
+:update_readme_stable_tag
+setlocal
+set "old_version=%~1"
+set "new_version=%~2"
+
+powershell -Command "(Get-Content '%README_FILE%') -replace 'Stable tag: %old_version%', 'Stable tag: %new_version%' | Set-Content '%README_FILE%'"
+echo readme.txt Stable tag updated: %old_version% -^> %new_version%
+
+endlocal
 goto :eof

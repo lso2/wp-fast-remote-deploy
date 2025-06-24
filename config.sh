@@ -6,7 +6,7 @@
 # License: GPLv3
 
 # Script Configuration
-VERSION="3.4.1"  # Script version
+VERSION="3.4.2"  # Script version
 
 # ============================================================================
 # REQUIRED: CONFIG - Quickly switch between plugins/themes & Set Type

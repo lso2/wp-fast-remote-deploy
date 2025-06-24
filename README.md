@@ -2,7 +2,7 @@
 
 ![Windows](https://img.shields.io/badge/Windows-10%2B-blue.svg)
 ![WordPress](https://img.shields.io/badge/WordPress-5.0%2B-21759B.svg)
-![Version](https://img.shields.io/badge/Version-3.4.1-green.svg)
+![Version](https://img.shields.io/badge/Version-3.4.2-green.svg)
 ![License](https://img.shields.io/badge/License-GPLv3-orange.svg)
 
 > **Created by:** [lso2](https://github.com/lso2)  
@@ -85,6 +85,7 @@ The script includes `update-version.bat` for automatic version number incrementi
 
 - **Silent operation** - Double-click to increment version numbers automatically
 - **Smart targeting** - For plugins: updates `folder-name/folder-name.php`; For themes: updates `style.css`  
+- **Readme.txt support** - Automatically updates "Stable tag" field in readme.txt when present
 - **Configurable backups** - Set `VERSION_BACKUP="true"` in config.sh to create .backup files
 - **Visual feedback** - Shows old and new version numbers when updating
 - **Auto-close control** - Configure whether window closes automatically after update
@@ -99,8 +100,9 @@ VERSION_AUTO_CLOSE="false"   # Keep window open to see version changes
 
 **Output example:**
 ```bash
-Plugin header version: 1.0.3 → 1.0.4
-Plugin define version: 1.0.3 → 1.0.4
+Plugin header version updated: 1.0.3 → 1.0.4
+Plugin define version updated: 1.0.3 → 1.0.4
+readme.txt Stable tag updated: 1.0.3 → 1.0.4
 
 Version update completed.
 Press any key to continue...
@@ -931,6 +933,14 @@ GPLv3 — freely use, modify, and distribute, with a commitment to keep the sour
 **⭐ If this script saved you time, please star the repository!**
 
 ## Changelog
+
+### v3.4.2 - Enhanced readme.txt Support
+- **📝 Automatic Readme.txt Updates** - Both manual and automatic version increments now update "Stable tag" field in readme.txt
+- **🔄 Unified Version Management** - Manual update-version.bat and deployment auto-increment both handle readme.txt synchronization
+- **📋 WordPress.org Compatibility** - Keeps plugin/theme versions in sync with WordPress repository stable tags
+- **🛠️ Smart Detection** - Only updates readme.txt when file exists, no errors when absent
+- **⚡ Seamless Integration** - readme.txt updates happen automatically alongside main file version updates
+- **💾 Backup Integration** - readme.txt included in backup operations when VERSION_BACKUP is enabled
 
 ### v3.4.1 - Enhanced Rollback Script Sorting
 - **🔢 Proper Version-First Sorting** - Rollback script now sorts backups by semantic version first (2.1.0, 2.0.0, 1.10.5, 1.2.3), then by date for same versions

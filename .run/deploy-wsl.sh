@@ -157,6 +157,12 @@ if [[ "$AUTO_INCREMENT_VERSION" == "true" ]]; then
             # Update the file
             sed -i "s/\( \* Version: \)$CURRENT_VER/\1$NEW_VER/" "$TARGET_FILE"
             
+            # Update readme.txt if it exists
+            README_FILE="$LOCAL_TARGET_DIR/readme.txt"
+            if [[ -f "$README_FILE" ]]; then
+                sed -i "s/^Stable tag: $CURRENT_VER/Stable tag: $NEW_VER/" "$README_FILE"
+            fi
+            
             # For plugins, also update define version if it exists
             if [[ "$TYPE" == "plugin" ]]; then
                 sed -i "s/'$CURRENT_VER'/'$NEW_VER'/" "$TARGET_FILE"
